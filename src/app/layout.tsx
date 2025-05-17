@@ -58,19 +58,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <nav className="bg-black text-white p-4 shadow-lg">
           <div className="container mx-auto flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold tracking-tight">
-              Biometric Platform
-            </Link>
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="text-2xl font-bold tracking-tight">
+                Biometric Platform
+              </Link>
+              <Link
+                href="/dashboard"
+                className="text-white hover:text-gray-200"
+              >
+                Dashboard
+              </Link>
+            </div>
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
                   <span className="font-semibold">Hello, {user.username}</span>
-                  <Link
-                    href="/dashboard"
-                    className="text-white hover:text-gray-200"
-                  >
-                    Dashboard
-                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="bg-accent text-white px-4 py-2 rounded-md font-bold hover:bg-accent/80"
