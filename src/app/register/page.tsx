@@ -16,6 +16,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -26,7 +27,16 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!username || !email || !password) {
+      toast.error("Vui lòng điền đầy đủ thông tin.", {
+        icon: "⚠️",
+      });
+      return;
+    }
+
     try {
+      toast.loading("Đang tạo tài khoản...", { id: "register" });
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -38,14 +48,17 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
+        toast.dismiss("register");
+        toast.success(data.message || "Tạo tài khoản thành công! 🎉");
         router.push("/login");
       } else {
-        alert(data.message);
+        toast.dismiss("register");
+        toast.error(data.message || "Đăng ký thất bại.");
       }
     } catch (error) {
       console.error("❌ Error during registration:", error);
-      alert("Something went wrong. Please try again.");
+      toast.dismiss("register");
+      toast.error("Đã xảy ra lỗi khi tạo tài khoản. Vui lòng thử lại.");
     }
   };
 

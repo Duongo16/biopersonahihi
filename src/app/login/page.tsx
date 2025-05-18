@@ -19,6 +19,7 @@ import { Input } from "../components/ui/input";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { Button } from "../components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -29,7 +30,16 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!email || !password) {
+      toast.error("Vui lòng nhập đầy đủ email và mật khẩu.", {
+        icon: "⚠️",
+      });
+      return;
+    }
+
     try {
+      toast.loading("Đang đăng nhập...", { id: "login" });
+
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -42,7 +52,10 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
+        toast.dismiss("login");
+        toast.success(data.message || "Đăng nhập thành công! 🎉");
+
+        // Lấy thông tin người dùng
         const userResponse = await fetch("/api/auth/me", {
           method: "GET",
           credentials: "include",
@@ -55,11 +68,13 @@ export default function LoginPage() {
 
         router.push("/");
       } else {
-        alert(data.message);
+        toast.dismiss("login");
+        toast.error(data.message || "Đăng nhập thất bại.");
       }
     } catch (error) {
       console.error("❌ Error during login:", error);
-      alert("Something went wrong. Please try again.");
+      toast.dismiss("login");
+      toast.error("Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.");
     }
   };
 

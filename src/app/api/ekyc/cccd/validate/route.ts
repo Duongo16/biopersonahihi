@@ -92,7 +92,14 @@ export async function POST(req: NextRequest) {
       const extractedName = fptData.data[0].name;
       const extractedDOB = fptData.data[0].dob;
 
-      console.log("FPT AI Response:", fptData.data[0]);
+      // Kiểm tra xem số CCCD đã tồn tại hay chưa
+      const duplicateCCCD = await UserCCCD.findOne({ idNumber: extractedID });
+      if (duplicateCCCD) {
+        return NextResponse.json(
+          { message: "Số CCCD này đã tồn tại. Không thể đăng ký trùng." },
+          { status: 400 }
+        );
+      }
 
       // Lưu thông tin CCCD vào database
       await connectDB();

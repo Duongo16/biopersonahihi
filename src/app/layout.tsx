@@ -5,6 +5,7 @@ import { ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authStore";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((state) => state.user);
@@ -43,8 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message);
-        setUser(null);
+        toast.success(data.message || "Đăng xuất thành công! 👋");
         router.push("/login");
       }
     } catch (error) {
@@ -101,6 +101,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </div>
         </nav>
         <main className="container mx-auto">{children}</main>
+        <Toaster position="top-right" reverseOrder={false} />
       </body>
     </html>
   );

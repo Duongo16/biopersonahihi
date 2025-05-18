@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 export default function IDUploader() {
   const [idFront, setIdFront] = useState<File | null>(null);
@@ -12,7 +13,7 @@ export default function IDUploader() {
   ) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file && !["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      alert("Chỉ chấp nhận file PNG hoặc JPG.");
+      toast.error("Chỉ chấp nhận file PNG hoặc JPG.");
       return;
     }
     if (type === "front") setIdFront(file);
@@ -21,7 +22,7 @@ export default function IDUploader() {
 
   const handleSubmit = async () => {
     if (!idFront || !idBack) {
-      alert("Vui lòng chọn cả ảnh mặt trước và mặt sau của CCCD.");
+      toast.error("Vui lòng chọn cả ảnh mặt trước và mặt sau của CCCD.");
       return;
     }
 
@@ -38,16 +39,18 @@ export default function IDUploader() {
 
       const data = await response.json();
       if (response.ok) {
-        alert(
+        toast.success(
           `Xác thực thành công! ID: ${data.extractedID}, Tên: ${data.extractedName}, Ngày sinh: ${data.extractedDOB}`
         );
       } else {
         console.error("Validation failed:", data);
-        alert(data.message || "Xác thực không thành công. Vui lòng thử lại.");
+        toast.error(
+          data.message || "Xác thực không thành công. Vui lòng thử lại."
+        );
       }
     } catch (error) {
       console.error("Error validating CCCD:", error);
-      alert("Failed to validate CCCD. Please try again.");
+      toast.error("Failed to validate CCCD. Please try again.");
     }
   };
 
