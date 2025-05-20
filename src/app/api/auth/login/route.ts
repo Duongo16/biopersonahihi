@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
-import User from "@/utils/models/types";
+import User from "@/utils/models/User";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +27,12 @@ export async function POST(req: NextRequest) {
 
     // Tạo token JWT
     const token = jwt.sign(
-      { id: user._id, username: user.username, email: user.email },
+      {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
       process.env.JWT_SECRET || "",
       { expiresIn: "1h" }
     );

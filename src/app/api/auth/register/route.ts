@@ -1,12 +1,12 @@
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
 import connectDB from "@/utils/db";
-import User from "@/utils/models/types";
+import User from "@/utils/models/User";
 
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const { username, email, password } = await req.json();
+    const { username, email, password, businessId } = await req.json();
 
     // Kiểm tra xem username hoặc email đã tồn tại chưa
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       username,
       email,
       password: hashedPassword,
+      businessId,
     });
 
     await user.save();

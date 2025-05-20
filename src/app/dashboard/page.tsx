@@ -22,12 +22,9 @@ export default function Dashboard() {
           method: "GET",
           credentials: "include",
         });
-        console.log(response);
         if (response.ok) {
           const data = await response.json();
           setCccdInfo(data);
-        } else {
-          console.error("CCCD not registered or unauthorized");
         }
       } catch (error) {
         console.error("Error fetching CCCD info:", error);

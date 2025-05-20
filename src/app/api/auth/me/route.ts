@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
       id: decoded.id,
       username: decoded.username,
       email: decoded.email,
+      role: decoded.role,
     };
 
     return NextResponse.json({ user }, { status: 200 });

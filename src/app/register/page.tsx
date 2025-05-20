@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, LockKeyhole, User } from "lucide-react";
 import Link from "next/link";
@@ -22,12 +22,30 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [businessId, setBusinessId] = useState("");
+  type Business = { _id: string; username: string; email: string };
+  const [businesses, setBusinesses] = useState<Business[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      try {
+        const response = await fetch("/api/business/list");
+        const data = await response.json();
+        setBusinesses(data.businesses);
+      } catch (error) {
+        console.error("Error fetching businesses:", error);
+        toast.error("Đã xảy ra lỗi khi tải danh sách business.");
+      }
+    };
+
+    fetchBusinesses();
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !businessId) {
       toast.error("Vui lòng điền đầy đủ thông tin.", {
         icon: "⚠️",
       });
@@ -42,7 +60,7 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, businessId }),
       });
 
       const data = await response.json();
@@ -130,6 +148,25 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="business" className="text-sm font-medium">
+                Select Business
+              </Label>
+              <select
+                id="business"
+                value={businessId}
+                onChange={(e) => setBusinessId(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+                required
+              >
+                <option value="">Select a business</option>
+                {businesses.map((business) => (
+                  <option key={business._id} value={business._id}>
+                    {business.username} ({business.email})
+                  </option>
+                ))}
+              </select>
             </div>
             <Button
               type="submit"

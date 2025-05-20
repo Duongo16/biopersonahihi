@@ -63,7 +63,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 Biometric Platform
               </Link>
               <Link
-                href="/dashboard"
+                href={
+                  user
+                    ? user.role == "business"
+                      ? "/dashboard-business"
+                      : "/dashboard"
+                    : "/login"
+                }
                 className="text-white hover:text-gray-200"
               >
                 Dashboard
@@ -89,6 +95,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   >
                     Register
                   </Link>
+                  <Link
+                    href="/register-business"
+                    className="text-white hover:text-gray-200"
+                  >
+                    Register Business
+                  </Link>
+
                   <Link
                     href="/login"
                     className="bg-accent text-white px-4 py-2 rounded-md font-bold"

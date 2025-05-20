@@ -16,10 +16,14 @@ export function middleware(req: NextRequest) {
   //   return NextResponse.redirect(new URL("/dashboard", req.url));
   // }
 
-  // // Chưa đăng nhập nhưng cố truy cập dashboard
-  // if (!token && req.nextUrl.pathname.startsWith("/dashboard")) {
-  //   return NextResponse.redirect(new URL("/login", req.url));
-  // }
+  // Chưa đăng nhập nhưng cố truy cập dashboard
+  if (
+    !token &&
+    (req.nextUrl.pathname.startsWith("/dashboard") ||
+      req.nextUrl.pathname.startsWith("/ekyc"))
+  ) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 
   // Xác thực token
   try {
@@ -45,6 +49,7 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     // "/dashboard/:path*",
+    // "/ekyc/:path*",
     "/login",
     "/register",
   ],
