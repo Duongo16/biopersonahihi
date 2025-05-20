@@ -7,6 +7,7 @@ export interface IUserCCCD extends Document {
   dateOfBirth: string;
   idFrontUrl: string;
   idBackUrl: string;
+  faceUrl?: string;
   verified: boolean;
   createdAt: Date;
 }
@@ -18,6 +19,7 @@ const UserCCCDSchema = new Schema<IUserCCCD>({
   dateOfBirth: { type: String, required: true },
   idFrontUrl: { type: String, required: true },
   idBackUrl: { type: String, required: true },
+  faceUrl: { type: String },
   verified: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });

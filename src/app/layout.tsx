@@ -74,6 +74,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               >
                 Dashboard
               </Link>
+              <Link
+                href="/face-verification"
+                className="text-white hover:text-gray-200"
+              >
+                Face Verification
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
