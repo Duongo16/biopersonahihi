@@ -154,7 +154,7 @@ export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
 
       <button
         onClick={handleFaceSubmit}
-        className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"
+        className="w-full bg-main text-white p-2 rounded-lg hover:bg-blue-700"
       >
         Xác minh khuôn mặt
       </button>

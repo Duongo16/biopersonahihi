@@ -9,7 +9,6 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -79,7 +78,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
+    <div className="min-h-screen flex items-center justify-center text-main from-slate-100 to-slate-200 p-4">
       <Card className="w-full max-w-md shadow-xl border-0">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-2">
@@ -90,16 +89,10 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold text-center text-primary">
             Welcome Back
           </CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access your account
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email
-              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -114,23 +107,12 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
               <div className="relative">
                 <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -143,11 +125,16 @@ export default function LoginPage() {
               <Label htmlFor="remember" className="text-sm font-medium">
                 Remember me
               </Label>
+              <div className="flex items-center ml-auto">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-black text-white hover:bg-gray-800"
-            >
+            <Button type="submit" className="w-full px-8">
               Sign In
             </Button>
           </form>

@@ -69,9 +69,12 @@ export default function EkycFlowPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md space-y-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <div className="w-full max-w-md space-y-8 mb-25">
         {/* Progress Indicator */}
+        <h1 className="text-3xl font-bold text-center text-main mb-10">
+          ĐĂNG KÝ eKYC
+        </h1>
         <div className="w-full flex justify-between items-center">
           {steps.map((label, index) => {
             const stepNumber = index + 1;
@@ -89,7 +92,7 @@ export default function EkycFlowPage() {
                       isCompleted
                         ? "bg-green-600 text-white"
                         : isActive
-                        ? "bg-blue-600 text-white"
+                        ? "bg-main text-white"
                         : "bg-gray-300 text-gray-700"
                     }`}
                 >
@@ -97,7 +100,7 @@ export default function EkycFlowPage() {
                 </div>
                 <span
                   className={
-                    isActive ? "font-medium text-blue-700" : "text-gray-500"
+                    isActive ? "font-medium text-main" : "text-gray-500"
                   }
                 >
                   {label}

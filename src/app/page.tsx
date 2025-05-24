@@ -11,19 +11,30 @@ import { Fingerprint, Shield, Lock, CheckCircle2 } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center text-main">
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-background to-muted">
-        <div className="container px-4 md:px-6">
+      <section
+        className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-background to-muted"
+        style={{
+          backgroundImage: "url('/bg-image.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundBlendMode: "overlay",
+          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          color: "white",
+          minHeight: "100vh",
+        }}
+      >
+        <div className="container px-4 md:px-10 pt-12 md:pt-24 lg:pt-32 xl:pt-48">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  Secure Identity Verification for the Digital Age
+                  eKYC Platform Authentication
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  Our biometric platform provides the most secure way to verify
-                  your identity and authorize transactions.
+                  Secure and seamless eKYC with biometrics – fast, reliable
+                  customer authentication!
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -37,14 +48,6 @@ export default function HomePage() {
                     View Demo
                   </Button>
                 </Link>
-              </div>
-            </div>
-            <div className="flex items-center justify-center">
-              <div className="relative h-[350px] w-[350px] md:h-[450px] md:w-[450px]">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/60 rounded-full blur-[100px] opacity-20"></div>
-                <div className="relative h-full w-full flex items-center justify-center">
-                  <Fingerprint className="h-48 w-48 md:h-64 md:w-64 text-primary" />
-                </div>
               </div>
             </div>
           </div>

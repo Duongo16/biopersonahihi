@@ -7,12 +7,10 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Label } from "@radix-ui/react-label";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
@@ -86,7 +84,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
+    <div className="min-h-screen flex items-center justify-center text-main from-slate-100 to-slate-200 p-25">
       <Card className="w-full max-w-md shadow-xl border-0">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-2">
@@ -97,16 +95,10 @@ export default function RegisterPage() {
           <CardTitle className="text-2xl font-bold text-center text-primary">
             Create an Account
           </CardTitle>
-          <CardDescription className="text-center">
-            Please enter your details to create an account
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Username
-              </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -121,9 +113,6 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email
-              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -138,15 +127,12 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
               <div className="relative">
                 <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -155,15 +141,12 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                Re-enter Password
-              </Label>
               <div className="relative">
                 <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Re-enter your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="pl-10"
@@ -172,9 +155,6 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="business" className="text-sm font-medium">
-                Select Business
-              </Label>
               <select
                 id="business"
                 value={businessId}
@@ -190,10 +170,7 @@ export default function RegisterPage() {
                 ))}
               </select>
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-black text-white hover:bg-gray-800"
-            >
+            <Button type="submit" className="w-full px-8">
               Sign Up
             </Button>
           </form>

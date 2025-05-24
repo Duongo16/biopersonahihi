@@ -17,13 +17,13 @@ const baseStyles =
   "inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none";
 
 const variants: Record<string, string> = {
-  default: "bg-primary text-white hover:bg-primary/90 rounded-md",
+  default: "bg-main text-white hover:bg-white rounded-md",
   destructive: "bg-red-600 text-white hover:bg-red-700 rounded-md",
   outline:
     "border border-gray-300 bg-white text-black hover:bg-gray-100 rounded-md",
   secondary: "bg-gray-100 text-black hover:bg-gray-200 rounded-md",
   ghost: "bg-transparent hover:bg-gray-100 text-black rounded-md",
-  link: "text-primary underline hover:opacity-80",
+  link: "text-main underline hover:opacity-80",
 };
 
 const sizes: Record<string, string> = {

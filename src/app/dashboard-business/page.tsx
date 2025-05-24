@@ -70,8 +70,8 @@ export default function BusinessDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-100 to-gray-200 p-8">
-      <h1 className="text-4xl font-bold mb-8">Business Dashboard</h1>
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-100 to-gray-200 p-8 mt-20">
+      <h1 className="text-3xl text-main font-bold mb-8">Business Dashboard</h1>
 
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-4xl mb-8">
         <h2 className="text-2xl font-semibold mb-4">API Key</h2>
@@ -81,7 +81,7 @@ export default function BusinessDashboardPage() {
           </p>
           <button
             onClick={handleApiKeyUpdate}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-main text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Update API Key
           </button>

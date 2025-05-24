@@ -106,7 +106,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
 
       <Button
         onClick={handleSubmit}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-main hover:bg-blue-700 text-white"
       >
         Xác thực CCCD
       </Button>
