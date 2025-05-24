@@ -2,7 +2,11 @@
 import { useEffect, useState } from "react";
 import IDUploader from "../../components/IDUploader";
 
-export default function CCCDUploadPage() {
+export default function CCCDUploadPage({
+  onSuccess,
+}: {
+  onSuccess: () => void;
+}) {
   const [cccdExists, setCccdExists] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +47,7 @@ export default function CCCDUploadPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-center mb-6">Upload CCCD</h1>
-      <IDUploader />
+      <IDUploader onSuccess={onSuccess} />
     </div>
   );
 }

@@ -2,18 +2,47 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Mail, LockKeyhole, Building2 } from "lucide-react";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Separator } from "@radix-ui/react-separator";
 import toast from "react-hot-toast";
 
 export default function BusinessRegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!username || !email || !password || !confirmPassword) {
+      toast.error("Vui lòng điền đầy đủ thông tin.", { icon: "⚠️" });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Mật khẩu nhập lại không khớp.");
+      return;
+    }
+
     try {
+      toast.loading("Đang tạo tài khoản business...", {
+        id: "registerBusiness",
+      });
+
       const response = await fetch("/api/auth/register-business", {
         method: "POST",
         headers: {
@@ -23,59 +52,138 @@ export default function BusinessRegisterPage() {
       });
 
       const data = await response.json();
+      toast.dismiss("registerBusiness");
 
       if (response.ok) {
-        toast.success("Đăng ký business thành công.");
+        toast.success("Đăng ký business thành công! 🎉");
         toast(`API Key: ${data.apiKey}`, { duration: 10000 });
         router.push("/login");
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Đăng ký business thất bại.");
       }
     } catch (error) {
       console.error("Error during business registration:", error);
+      toast.dismiss("registerBusiness");
       toast.error("Đã xảy ra lỗi khi đăng ký business.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Đăng Ký Business
-        </h2>
-        <form onSubmit={handleRegister} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Business Name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 border rounded-lg"
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded-lg"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded-lg"
-            required
-          />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded-lg"
-          >
-            Đăng Ký
-          </button>
-        </form>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
+      <Card className="w-full max-w-md shadow-xl border-0">
+        <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-2">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center text-primary">
+            Register Your Business
+          </CardTitle>
+          <CardDescription className="text-center">
+            Please enter your business details to register
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-sm font-medium">
+                Business Name
+              </Label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Enter your business name"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                Re-enter Password
+              </Label>
+              <div className="relative">
+                <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-black text-white hover:bg-gray-800"
+            >
+              Register Business
+            </Button>
+          </form>
+        </CardContent>
+        <Separator />
+        <CardFooter className="flex flex-col space-y-4 pt-4">
+          <div className="text-sm text-center text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-primary hover:underline font-medium"
+            >
+              Sign in
+            </Link>
+          </div>
+          <div className="text-sm text-center text-muted-foreground">
+            Want to create a user account?{" "}
+            <Link
+              href="/register"
+              className="text-primary hover:underline font-medium"
+            >
+              Register User
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

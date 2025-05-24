@@ -74,11 +74,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               >
                 Dashboard
               </Link>
-              <Link
-                href="/face-verification"
-                className="text-white hover:text-gray-200"
-              >
-                Face Verification
+              <Link href="/ekyc" className="text-white hover:text-gray-200">
+                eKYC Register
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -100,12 +97,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     className="text-white hover:text-gray-200"
                   >
                     Register
-                  </Link>
-                  <Link
-                    href="/register-business"
-                    className="text-white hover:text-gray-200"
-                  >
-                    Register Business
                   </Link>
 
                   <Link

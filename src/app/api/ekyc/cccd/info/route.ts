@@ -35,6 +35,8 @@ export async function GET(req: NextRequest) {
       idFrontUrl: userCCCD.idFrontUrl,
       idBackUrl: userCCCD.idBackUrl,
       verified: userCCCD.verified,
+      faceUrl: userCCCD.faceUrl,
+      voiceUrl: userCCCD.voiceUrl,
     });
   } catch (error) {
     console.error("Error fetching CCCD info:", error);

@@ -22,9 +22,11 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [businessId, setBusinessId] = useState("");
-  type Business = { _id: string; username: string; email: string };
-  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [businesses, setBusinesses] = useState<
+    { _id: string; username: string; email: string }[]
+  >([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,10 +47,13 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !email || !password || !businessId) {
-      toast.error("Vui lòng điền đầy đủ thông tin.", {
-        icon: "⚠️",
-      });
+    if (!username || !email || !password || !confirmPassword || !businessId) {
+      toast.error("Vui lòng điền đầy đủ thông tin.", { icon: "⚠️" });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Mật khẩu nhập lại không khớp.");
       return;
     }
 
@@ -65,12 +70,12 @@ export default function RegisterPage() {
 
       const data = await response.json();
 
+      toast.dismiss("register");
+
       if (response.ok) {
-        toast.dismiss("register");
         toast.success(data.message || "Tạo tài khoản thành công! 🎉");
         router.push("/login");
       } else {
-        toast.dismiss("register");
         toast.error(data.message || "Đăng ký thất bại.");
       }
     } catch (error) {
@@ -150,6 +155,23 @@ export default function RegisterPage() {
               </div>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                Re-enter Password
+              </Label>
+              <div className="relative">
+                <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="business" className="text-sm font-medium">
                 Select Business
               </Label>
@@ -185,6 +207,15 @@ export default function RegisterPage() {
               className="text-primary hover:underline font-medium"
             >
               Sign in
+            </Link>
+          </div>
+          <div className="text-sm text-center text-muted-foreground">
+            You want to register your business?{" "}
+            <Link
+              href="/register-business"
+              className="text-primary hover:underline font-medium"
+            >
+              Register Business
             </Link>
           </div>
         </CardFooter>

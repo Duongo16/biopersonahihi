@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
 
-export default function IDUploader() {
+export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
   const [idFront, setIdFront] = useState<File | null>(null);
   const [idBack, setIdBack] = useState<File | null>(null);
+  const [idFrontPreview, setIdFrontPreview] = useState<string | null>(null);
+  const [idBackPreview, setIdBackPreview] = useState<string | null>(null);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -16,8 +21,14 @@ export default function IDUploader() {
       toast.error("Chỉ chấp nhận file PNG hoặc JPG.");
       return;
     }
-    if (type === "front") setIdFront(file);
-    if (type === "back") setIdBack(file);
+    if (type === "front") {
+      setIdFront(file);
+      setIdFrontPreview(file ? URL.createObjectURL(file) : null);
+    }
+    if (type === "back") {
+      setIdBack(file);
+      setIdBackPreview(file ? URL.createObjectURL(file) : null);
+    }
   };
 
   const handleSubmit = async () => {
@@ -42,6 +53,7 @@ export default function IDUploader() {
         toast.success(
           `Xác thực thành công! ID: ${data.extractedID}, Tên: ${data.extractedName}, Ngày sinh: ${data.extractedDOB}`
         );
+        onSuccess();
       } else {
         console.error("Validation failed:", data);
         toast.error(
@@ -55,25 +67,49 @@ export default function IDUploader() {
   };
 
   return (
-    <div className="text-center">
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => handleFileChange(e, "front")}
-        className="mb-4"
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => handleFileChange(e, "back")}
-        className="mb-4"
-      />
-      <button
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="idFront">Ảnh mặt trước CCCD</Label>
+          <Input
+            id="idFront"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileChange(e, "front")}
+          />
+          {idFrontPreview && (
+            <img
+              src={idFrontPreview}
+              alt="Ảnh CCCD mặt trước"
+              className="mt-2 rounded border w-full object-contain max-h-64"
+            />
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="idBack">Ảnh mặt sau CCCD</Label>
+          <Input
+            id="idBack"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileChange(e, "back")}
+          />
+          {idBackPreview && (
+            <img
+              src={idBackPreview}
+              alt="Ảnh CCCD mặt sau"
+              className="mt-2 rounded border w-full object-contain max-h-64"
+            />
+          )}
+        </div>
+      </div>
+
+      <Button
         onClick={handleSubmit}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
       >
-        Validate CCCD
-      </button>
+        Xác thực CCCD
+      </Button>
     </div>
   );
 }
