@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Python backend:
+
+venv environment: source venv310/Scripts/activate
+FastAPI running: uvicorn main:app --reload
+
 ## Getting Started
 
 First, run the development server:

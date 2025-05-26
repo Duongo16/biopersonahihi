@@ -22,10 +22,10 @@ export default function HomePage() {
           backgroundBlendMode: "overlay",
           backgroundColor: "rgba(0, 0, 0, 0.2)",
           color: "white",
-          minHeight: "100vh",
+          maxHeight: "100vh",
         }}
       >
-        <div className="container px-4 md:px-10 pt-12 md:pt-24 lg:pt-32 xl:pt-48">
+        <div className="container px-4 md:px-10 pt-12 md:pt-24 lg:pt-32 xl:pt-40">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">

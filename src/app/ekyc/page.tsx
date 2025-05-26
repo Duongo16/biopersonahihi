@@ -10,6 +10,7 @@ export default function EkycFlowPage() {
   const [step, setStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [hasCCCD, setHasCCCD] = useState(false);
+
   const [userId, setUserId] = useState<string>("");
 
   const steps = ["Đăng ký CCCD", "Chụp khuôn mặt", "Thu giọng nói"];
@@ -42,8 +43,14 @@ export default function EkycFlowPage() {
 
         if (response.ok) {
           setHasCCCD(true);
-          setStep(2);
           setCompletedSteps([1]);
+          const data = await response.json();
+          if (data.voiceUrl) {
+            setCompletedSteps([1, 2, 3]);
+          } else if (data.faceUrl) {
+            setStep(3);
+            setCompletedSteps([1, 2]);
+          } else setStep(2);
         }
       } catch (error) {
         console.error("❌ Lỗi kiểm tra CCCD:", error);
@@ -120,7 +127,13 @@ export default function EkycFlowPage() {
               }}
             />
           )}
-          {step === 2 && <FaceStep onSuccess={() => markStepComplete(2)} />}
+          {step === 2 && (
+            <FaceStep
+              onSuccess={() => {
+                markStepComplete(2);
+              }}
+            />
+          )}
           {step === 3 && userId && (
             <VoiceStep
               userId={userId}

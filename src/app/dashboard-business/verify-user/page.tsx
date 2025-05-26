@@ -31,7 +31,7 @@ export default function VerifyUserPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 mt-20">
       <h1 className="text-2xl font-bold mb-4">Giả lập xác thực người dùng</h1>
 
       <input

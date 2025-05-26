@@ -1,72 +1,75 @@
-"use client";
-
-import { useState } from "react";
-import MicRecorder from "mic-recorder-to-mp3";
+import { useState, useRef } from "react";
 import { Button } from "../components/ui/button";
 import toast from "react-hot-toast";
 
-const recorder = new MicRecorder({ bitRate: 128 });
-
-export default function VoiceStep({
-  userId,
-  onSuccess,
-}: {
+interface VoiceStepProps {
   userId: string;
   onSuccess: () => void;
-}) {
+}
+
+export default function VoiceStep({ userId, onSuccess }: VoiceStepProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [loading, setLoading] = useState(false);
+  const chunksRef = useRef<Blob[]>([]);
 
-  const startRecording = () => {
-    recorder.start().then(() => {
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "audio/webm",
+      });
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const file = new File([blob], "voice.wav", { type: "audio/wav" });
+        setAudioFile(file);
+        setAudioUrl(URL.createObjectURL(blob));
+        toast.success("✅ Đã ghi âm xong!");
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
       setIsRecording(true);
       toast("🎙️ Đang ghi âm...");
-    });
+    } catch {
+      toast.error("Không thể truy cập microphone");
+    }
   };
 
   const stopRecording = () => {
-    recorder
-      .stop()
-      .getMp3()
-      .then(([buffer, blob]) => {
-        const file = new File(buffer, "voice.wav", {
-          type: blob.type,
-          lastModified: Date.now(),
-        });
-        setAudioFile(file);
-        setAudioUrl(URL.createObjectURL(file));
-        setIsRecording(false);
-        toast.success("✅ Đã ghi âm xong!");
-      });
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
   };
 
   const handleUpload = async () => {
-    if (!audioFile) return toast.error("Chưa có file ghi âm");
-    if (!userId) return toast.error("Thiếu userId");
-
+    if (!audioFile || !userId) return toast.error("Thiếu dữ liệu");
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("userId", userId);
-      formData.append("voice", audioFile);
+      formData.append("user_id", userId); // ✅ đúng với backend FastAPI
+      formData.append("file", audioFile);
 
-      const res = await fetch("/api/ekyc/voice-collect", {
+      const res = await fetch("http://localhost:8000/enroll", {
         method: "POST",
         body: formData,
       });
 
       const result = await res.json();
-
       if (res.ok) {
-        toast.success("🎉 Đã lưu voice profile thành công!");
+        toast.success("🎉 Đã lưu voice vector thành công!");
         onSuccess();
       } else {
         toast.error(result.message || "Lỗi khi enroll giọng nói");
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Không thể gửi giọng nói lên server");
     } finally {
       setLoading(false);

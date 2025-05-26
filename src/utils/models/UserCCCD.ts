@@ -9,6 +9,7 @@ export interface IUserCCCD extends Document {
   idBackUrl: string;
   faceUrl?: string;
   voiceUrl?: string;
+  voiceVector?: number[];
   verified: boolean;
   createdAt: Date;
 }
@@ -22,6 +23,7 @@ const UserCCCDSchema = new Schema<IUserCCCD>({
   idBackUrl: { type: String, required: true },
   faceUrl: { type: String, default: "" },
   voiceUrl: { type: String, default: "" },
+  voiceVector: { type: [Number], default: [] },
   verified: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });

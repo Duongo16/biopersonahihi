@@ -1,104 +1,85 @@
 import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/utils/db";
-import UserCCCD from "@/utils/models/UserCCCD";
 import fs from "fs";
 import path from "path";
-import FormData from "form-data";
 import axios from "axios";
+import connectDB from "@/utils/db";
+import UserCCCD from "@/utils/models/UserCCCD";
 
-const RESEMBLE_API_KEY = process.env.RESEMBLE_API_KEY;
-const RESEMBLE_BASE_URL = "https://app.resemble.ai/api/v1";
+const AZURE_REGION = process.env.AZURE_SPEAKER_REGION;
+const AZURE_KEY = process.env.AZURE_SPEAKER_KEY;
+const AZURE_BASE = `https://${AZURE_REGION}.api.cognitive.microsoft.com`;
 
 export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
     const userId = form.get("userId") as string;
-    const voiceFile = form.get("voice") as File;
+    const voice = form.get("voice") as File;
 
-    if (!userId) {
-      return NextResponse.json({ message: "Thiếu userId " }, { status: 400 });
-    }
-    if (!voiceFile) {
+    if (!userId || !voice) {
       return NextResponse.json(
-        { message: "Thiếu file giọng nói" },
+        { message: "Thiếu userId hoặc voice" },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    // 1️⃣ Tạo voice profile
-    const voiceName = `voice-${userId}`;
-    const voiceRes = await axios.post(
-      `${RESEMBLE_BASE_URL}/voices`,
-      {
-        name: voiceName,
-        description: `Voice profile for userId ${userId}`,
-        gender: "neutral",
-      },
+    // 1️⃣ Tạo profile mới (Text-Dependent API mới)
+    const createProfileRes = await axios.post(
+      `${AZURE_BASE}/speaker-recognition/verification/text-dependent/profiles`,
+      { locale: "en-us" },
       {
         headers: {
-          Authorization: `Bearer ${RESEMBLE_API_KEY}`,
+          "Ocp-Apim-Subscription-Key": AZURE_KEY!,
           "Content-Type": "application/json",
         },
       }
     );
 
-    const voiceId = voiceRes.data?.item?.uuid;
-    if (!voiceId) {
-      return NextResponse.json(
-        { message: "Không tạo được voice profile" },
-        { status: 500 }
-      );
-    }
+    const profileId = createProfileRes.data.verificationProfileId;
 
-    // 2️⃣ Upload voice file
-    const tempPath = path.join(process.cwd(), `temp-${userId}.wav`);
-    fs.writeFileSync(tempPath, Buffer.from(await voiceFile.arrayBuffer()));
+    // 2️⃣ Gửi file wav để enroll
+    const tempPath = path.join(process.cwd(), `temp-${Date.now()}.wav`);
+    fs.writeFileSync(tempPath, Buffer.from(await voice.arrayBuffer()));
 
-    const formData = new FormData();
-    formData.append("voice", voiceId);
-    formData.append("file", fs.createReadStream(tempPath));
-    formData.append("is_active", "true");
-
-    await axios.post(`${RESEMBLE_BASE_URL}/recordings`, formData, {
-      headers: {
-        Authorization: `Token ${RESEMBLE_API_KEY}`,
-        ...formData.getHeaders(),
-      },
-    });
+    const enrollRes = await axios.post(
+      `${AZURE_BASE}/speaker-recognition/verification/text-dependent/profiles/${profileId}/enrollments`,
+      fs.createReadStream(tempPath),
+      {
+        headers: {
+          "Ocp-Apim-Subscription-Key": AZURE_KEY!,
+          "Content-Type": "audio/wav",
+        },
+      }
+    );
 
     fs.unlinkSync(tempPath);
 
-    // 3️⃣ Lưu voiceId vào DB
+    const result = enrollRes.data;
+
+    // 3️⃣ Lưu profileId vào voiceUrl
     await UserCCCD.findOneAndUpdate(
       { userId },
-      { voiceUrl: voiceId },
+      { voiceUrl: profileId },
       { new: true }
     );
 
-    return NextResponse.json({ success: true, voiceId });
-  } catch (err: unknown) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "response" in err &&
-      "message" in err
-    ) {
+    return NextResponse.json({
+      success: true,
+      profileId,
+      enrollmentStatus: result.enrollmentStatus,
+      enrollmentsCount: result.enrollmentsCount,
+      remainingEnrollmentsCount: result.remainingEnrollmentsCount,
+    });
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
       console.error(
-        "Lỗi xử lý voice enroll:",
-        typeof err.response === "object" &&
-          err.response &&
-          "data" in err.response
-          ? (err.response as { data?: unknown }).data
-          : err.message
+        "❌ Voice enroll error:",
+        error.response?.data || error.message
       );
     } else {
-      console.error("Lỗi xử lý voice enroll:", err);
+      console.error("❌ Voice enroll error:", error);
     }
-    return NextResponse.json(
-      { message: "Lỗi khi xử lý voice enroll" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
