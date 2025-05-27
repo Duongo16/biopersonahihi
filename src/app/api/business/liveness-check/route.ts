@@ -67,8 +67,23 @@ export async function POST(req: NextRequest) {
 
     const isLive = result?.liveness?.is_live === "true";
     const isMatch = result?.face_match?.isMatch === "true";
-    const similarity = parseFloat(result?.face_match?.similarity || "0");
-    const spoofProb = parseFloat(result?.liveness?.spoof_prob || "0");
+
+    const similarityRaw = result?.face_match?.similarity;
+    const spoofProbRaw = result?.liveness?.spoof_prob;
+
+    const similarity = !isNaN(parseFloat(similarityRaw))
+      ? parseFloat(similarityRaw)
+      : 0;
+    const spoofProb = !isNaN(parseFloat(spoofProbRaw))
+      ? parseFloat(spoofProbRaw)
+      : 0;
+
+    console.log("Kết quả liveness:", {
+      isLive,
+      isMatch,
+      similarity,
+      spoofProb,
+    });
 
     // 👉 Ghi log
     await VerificationLog.create({

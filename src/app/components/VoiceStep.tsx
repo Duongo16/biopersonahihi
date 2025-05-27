@@ -56,6 +56,10 @@ export default function VoiceStep({ userId, onSuccess }: VoiceStepProps) {
       const formData = new FormData();
       formData.append("user_id", userId); // ✅ đúng với backend FastAPI
       formData.append("file", audioFile);
+      console.log("Gửi dữ liệu:", {
+        user_id: userId,
+        file: audioFile.name,
+      });
 
       const res = await fetch("http://localhost:8000/enroll", {
         method: "POST",
