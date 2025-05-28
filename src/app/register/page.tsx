@@ -56,29 +56,35 @@ export default function RegisterPage() {
     }
 
     try {
-      toast.loading("Đang tạo tài khoản...", { id: "register" });
+      toast.loading("Đang gửi mã xác minh...", { id: "send-otp" });
 
-      const response = await fetch("/api/auth/register", {
+      const otpRes = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, email, password, businessId }),
+        body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-      toast.dismiss("register");
+      toast.dismiss("send-otp");
 
-      if (response.ok) {
-        toast.success(data.message || "Tạo tài khoản thành công! 🎉");
-        router.push("/login");
-      } else {
-        toast.error(data.message || "Đăng ký thất bại.");
+      if (!otpRes.ok) {
+        const data = await otpRes.json();
+        toast.error(data.message || "Gửi OTP thất bại.");
+        return;
       }
+
+      // ✅ Lưu tạm thông tin người dùng để dùng ở trang verify-otp
+      localStorage.setItem(
+        "pendingUser",
+        JSON.stringify({ username, email, password, businessId })
+      );
+
+      router.push("/verify-otp");
     } catch (error) {
-      console.error("❌ Error during registration:", error);
-      toast.dismiss("register");
-      toast.error("Đã xảy ra lỗi khi tạo tài khoản. Vui lòng thử lại.");
+      console.error("❌ Error sending OTP:", error);
+      toast.dismiss("send-otp");
+      toast.error("Đã xảy ra lỗi khi gửi OTP. Vui lòng thử lại.");
     }
   };
 

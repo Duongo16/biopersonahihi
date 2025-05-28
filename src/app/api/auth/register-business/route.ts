@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
+import OTPModel from "@/utils/models/OTP";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +18,6 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Kiểm tra email đã tồn tại chưa
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -26,13 +26,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Mã hóa mật khẩu
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Tạo API key cho business
     const apiKey = nanoid(32);
 
-    // Tạo business mới
     const newBusiness = new User({
       username,
       email,
@@ -42,6 +38,7 @@ export async function POST(req: NextRequest) {
     });
 
     await newBusiness.save();
+    await OTPModel.deleteOne({ email }); // Xóa OTP đã dùng
 
     return NextResponse.json({
       message: "Đăng ký business thành công.",

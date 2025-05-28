@@ -36,32 +36,37 @@ export default function BusinessRegisterPage() {
     }
 
     try {
-      toast.loading("Đang tạo tài khoản business...", {
-        id: "registerBusiness",
-      });
+      toast.loading("Đang gửi mã xác minh email...", { id: "otp-send" });
 
-      const response = await fetch("/api/auth/register-business", {
+      const otpResponse = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-      toast.dismiss("registerBusiness");
+      toast.dismiss("otp-send");
 
-      if (response.ok) {
-        toast.success("Đăng ký business thành công! 🎉");
-        toast(`API Key: ${data.apiKey}`, { duration: 10000 });
-        router.push("/login");
-      } else {
-        toast.error(data.message || "Đăng ký business thất bại.");
+      const otpData = await otpResponse.json();
+
+      if (!otpResponse.ok) {
+        toast.error(otpData.message || "Gửi OTP thất bại.");
+        return;
       }
+
+      // ✅ Lưu thông tin đăng ký vào localStorage
+      localStorage.setItem(
+        "pendingBusiness",
+        JSON.stringify({ username, email, password })
+      );
+
+      toast.success("Mã xác minh đã được gửi! 📧");
+      router.push("/verify-otp"); // dùng chung với user
     } catch (error) {
-      console.error("Error during business registration:", error);
-      toast.dismiss("registerBusiness");
-      toast.error("Đã xảy ra lỗi khi đăng ký business.");
+      console.error("❌ Error during OTP send:", error);
+      toast.dismiss("otp-send");
+      toast.error("Đã xảy ra lỗi khi gửi OTP.");
     }
   };
 
