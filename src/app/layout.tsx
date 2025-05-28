@@ -52,6 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         toast.success(data.message || "Đăng xuất thành công! 👋");
+        useAuthStore.getState().logout();
         router.push("/login");
       }
     } catch (error) {
