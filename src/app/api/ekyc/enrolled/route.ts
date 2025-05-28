@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     user.idFrontUrl &&
     user.idBackUrl &&
     user.faceUrl &&
-    user.voiceUrl
+    user.voiceVector
   ) {
     return NextResponse.json({ done: true });
   }

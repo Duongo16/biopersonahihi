@@ -15,7 +15,7 @@ import {
 } from "../components/ui/card";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../components/ui/input";
-import { Checkbox } from "@radix-ui/react-checkbox";
+import { Checkbox } from "../components/ui/checkbox";
 import { Button } from "../components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
 import toast from "react-hot-toast";
@@ -23,6 +23,8 @@ import toast from "react-hot-toast";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
 
@@ -44,7 +46,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, rememberMe }),
         credentials: "include",
       });
 
@@ -121,7 +123,13 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
+              />
+
               <Label htmlFor="remember" className="text-sm font-medium">
                 Remember me
               </Label>

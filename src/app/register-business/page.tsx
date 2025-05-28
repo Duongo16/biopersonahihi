@@ -13,7 +13,6 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import { Separator } from "@radix-ui/react-separator";
 import toast from "react-hot-toast";
 
 export default function BusinessRegisterPage() {
@@ -67,8 +66,8 @@ export default function BusinessRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-main from-slate-100 to-slate-200 p-20">
-      <Card className="w-full max-w-md shadow-xl border-0">
+    <div className="min-h-screen flex items-center justify-center from-slate-100 to-slate-200 px-4 sm:px-6 text-main">
+      <Card className="w-full sm:max-w-md shadow-xl border-0">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-2">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -79,70 +78,63 @@ export default function BusinessRegisterPage() {
             Register Your Business
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="space-y-2">
-              <div className="relative">
-                <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your business name"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Enter your business name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="pl-10"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="email"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <div className="relative">
-                <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+
+            <div className="relative">
+              <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <div className="relative">
-                <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+
+            <div className="relative">
+              <LockKeyhole className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="pl-10"
+                required
+              />
             </div>
-            <Button type="submit" className="w-full px-8">
+
+            <Button type="submit" className="w-full font-semibold">
               Register Business
             </Button>
           </form>
         </CardContent>
-        <Separator />
+
         <CardFooter className="flex flex-col space-y-4 pt-4">
           <div className="text-sm text-center text-muted-foreground">
             Already have an account?{" "}

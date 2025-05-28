@@ -8,11 +8,13 @@ interface UserCCCD {
   idNumber: string;
   idFrontUrl: string;
   faceUrl: string;
+  voiceVector: number[];
 }
 
 export default function VerifyUserPage() {
   const [userId, setUserId] = useState("");
   const [userCCCD, setUserCCCD] = useState<UserCCCD | null>(null);
+  const [ekycEnrollDone, setEkycEnrollDone] = useState(false);
 
   const handleFetch = async () => {
     try {
@@ -21,6 +23,15 @@ export default function VerifyUserPage() {
       if (res.ok) {
         setUserCCCD(data.cccd);
         toast.success("Lấy thông tin người dùng thành công!");
+        if (
+          data.cccd.idFrontUrl &&
+          data.cccd.idBackUrl &&
+          data.cccd.faceUrl &&
+          data.cccd.voiceVector &&
+          data.cccd.voiceVector.length > 0
+        ) {
+          setEkycEnrollDone(true);
+        }
       } else {
         toast.error(data.message);
       }
@@ -44,7 +55,7 @@ export default function VerifyUserPage() {
 
       <button
         onClick={handleFetch}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="bg-main text-white px-4 py-2 rounded ml-2"
       >
         Bắt đầu xác thực
       </button>
@@ -71,14 +82,22 @@ export default function VerifyUserPage() {
             />
           </div>
 
-          <div className="mt-6">
-            <a
-              href={`/dashboard-business/verify-user/${userId}`}
-              className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              Tiếp tục xác minh khuôn mặt
-            </a>
-          </div>
+          {ekycEnrollDone ? (
+            <div className="mt-6">
+              <a
+                href={`/dashboard-business/verify-user/${userId}`}
+                className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Bắt đầu xác minh sinh trắc học
+              </a>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <a className="inline-block bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Người dùng chưa hoàn tất đăng ký eKYC, vui lòng đăng ký trước
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>

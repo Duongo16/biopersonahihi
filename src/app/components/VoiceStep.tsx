@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import toast from "react-hot-toast";
 
@@ -11,6 +11,7 @@ export default function VoiceStep({ userId, onSuccess }: VoiceStepProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [voiceExists, setVoiceExist] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [loading, setLoading] = useState(false);
   const chunksRef = useRef<Blob[]>([]);
@@ -79,6 +80,42 @@ export default function VoiceStep({ userId, onSuccess }: VoiceStepProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const checkVoiceVector = async () => {
+      try {
+        const response = await fetch("/api/ekyc/cccd/info", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.voiceVector) {
+            setVoiceExist(true);
+          }
+        }
+      } catch (error) {
+        console.error("❌ Error checking CCCD:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkVoiceVector();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (voiceExists) {
+    return (
+      <div className="text-center bg-green-100 border border-green-500 text-green-700 p-4 rounded-lg">
+        <h2 className="text-xl font-semibold mb-2">Giọng nói đã đăng ký</h2>
+        <p>
+          Bạn đã đăng ký giọng nói thành công. Không thể thêm giọng nói mới.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

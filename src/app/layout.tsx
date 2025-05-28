@@ -8,47 +8,16 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import useAuthStore from "@/store/authStore";
 import toast, { Toaster } from "react-hot-toast";
+import useFetchUserOnce from "@/hooks/useFetchUserOnce";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
   const router = useRouter();
   const pathname = usePathname();
   const [ekycDone, setEkycDone] = useState<boolean | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const handleClick = () => {
-      setDropdownOpen(false);
-    };
-    if (dropdownOpen) {
-      window.addEventListener("click", handleClick);
-    }
-    return () => window.removeEventListener("click", handleClick);
-  }, [dropdownOpen]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("❌ Error checking auth status:", error);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-  }, [setUser]);
+  useFetchUserOnce();
 
   useEffect(() => {
     const checkEkycDone = async () => {
@@ -67,6 +36,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     else setEkycDone(null);
   }, [user]);
 
+  useEffect(() => {
+    const handleClick = () => setDropdownOpen(false);
+    if (dropdownOpen) window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
+  }, [dropdownOpen]);
+
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/auth/logout", {
@@ -81,7 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("❌ Error during logout:", error);
-      alert("Something went wrong. Please try again.");
+      alert("Đã xảy ra lỗi. Vui lòng thử lại.");
     }
   };
 
@@ -106,35 +81,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     className="flex items-center font-semibold focus:outline-none"
                   >
                     Hello, {user.username}
-                    {dropdownOpen ? (
-                      <svg
-                        className="w-4 h-4 ml-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 15l7-7 7 7"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 ml-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    )}
+                    <svg
+                      className="w-4 h-4 ml-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d={dropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+                      />
+                    </svg>
                   </button>
                   {dropdownOpen && (
                     <div
@@ -204,7 +163,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {user &&
           user.role == "user" &&
           ekycDone !== null &&
-          pathname !== "/ekyc" && (
+          pathname !== "/ekyc" &&
+          pathname !== "/dashboard" && (
             <div className="pt-15 flex justify-center z-40 absolute w-full">
               <div
                 className={`flex justify-between items-center gap-4 px-6 py-3 mx-auto max-w-4xl w-full rounded-md shadow-md transition-all duration-300 ${

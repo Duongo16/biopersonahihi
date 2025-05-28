@@ -7,7 +7,7 @@ import User from "@/utils/models/User";
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const { email, password } = await req.json();
+    const { email, password, rememberMe } = await req.json();
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60,
+      path: "/",
     });
 
     return response;
