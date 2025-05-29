@@ -10,16 +10,29 @@ import {
   CardContent,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Progress } from "../../../components/ui/progress";
+import {
+  Camera,
+  Mic,
+  CheckCircle,
+  XCircle,
+  Play,
+  Square,
+  RefreshCw,
+  Shield,
+} from "lucide-react";
 
 export default function VerifyUserPage() {
   const { userId } = useParams();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playbackRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
 
+  const [currentStep, setCurrentStep] = useState(1);
   const [cameraOn, setCameraOn] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoBlob, setVideoBlob] = useState<string | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [recording, setRecording] = useState(false);
   const [audioRecording, setAudioRecording] = useState(false);
@@ -34,31 +47,35 @@ export default function VerifyUserPage() {
   const [voiceScore, setVoiceScore] = useState<number | null>(null);
 
   const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-      setCameraOn(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setCameraOn(true);
+      }
+    } catch {
+      toast.error("Không thể truy cập camera");
     }
   };
 
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject as MediaStream;
     stream?.getTracks().forEach((track) => track.stop());
-    videoRef.current!.srcObject = null;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setCameraOn(false);
   };
 
-  const toggleCamera = async () => {
-    if (cameraOn) {
-      stopCamera();
-    } else {
-      await startCamera();
-    }
+  const resetVideo = () => {
+    setVideoFile(null);
+    setVideoBlob(null);
+    startCamera();
   };
 
   const startRecording = () => {
     if (!cameraOn) {
-      toast.error("❗ Bạn cần bật camera trước khi quay video!");
+      toast.error("Vui lòng bật camera trước");
       return;
     }
 
@@ -74,18 +91,18 @@ export default function VerifyUserPage() {
       const blob = new Blob(chunks, { type: "video/webm" });
       const file = new File([blob], "video.webm", { type: "video/webm" });
       setVideoFile(file);
-      if (playbackRef.current) {
-        playbackRef.current.src = URL.createObjectURL(blob);
-        playbackRef.current.load();
-      }
-      toast.success("🎥 Đã quay video thành công!");
+
+      // Create URL for the video blob to display in the camera area
+      const blobUrl = URL.createObjectURL(blob);
+      setVideoBlob(blobUrl);
+
+      toast.success("Quay video thành công!");
       stopCamera();
     };
 
     mediaRecorderRef.current = recorder;
     recorder.start();
     setRecording(true);
-    toast("⏺️ Đang quay video...");
 
     let countdownTime = 5;
     setCountdown(countdownTime);
@@ -102,195 +119,419 @@ export default function VerifyUserPage() {
   };
 
   const startAudioRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-    const chunks: Blob[] = [];
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const chunks: Blob[] = [];
 
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunks.push(e.data);
-    };
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
 
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: "audio/webm" });
-      const file = new File([blob], "voice.webm", { type: "audio/webm" });
-      setAudioFile(file);
-      toast.success("🎤 Đã ghi âm xong!");
-    };
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const file = new File([blob], "voice.webm", { type: "audio/webm" });
+        setAudioFile(file);
+        toast.success("Ghi âm thành công!");
+        setCurrentStep(3);
+      };
 
-    audioRecorderRef.current = recorder;
-    recorder.start();
-    setAudioRecording(true);
-    toast("🎙️ Đang ghi âm...");
+      audioRecorderRef.current = recorder;
+      recorder.start();
+      setAudioRecording(true);
 
-    setTimeout(() => {
-      recorder.stop();
-      setAudioRecording(false);
-    }, 5000);
-  };
-
-  const verifyLiveness = async () => {
-    if (!videoFile) return toast.error("❌ Chưa có video!");
-    setLoadingLiveness(true);
-
-    const formData = new FormData();
-    formData.append("userId", userId as string);
-    formData.append("video", videoFile);
-
-    const res = await fetch("/api/business/liveness-check", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-    setLoadingLiveness(false);
-
-    if (res.ok) {
-      const { is_live, is_match, similarity } = data;
-      setLivenessResult({ is_live, is_match, similarity });
-
-      if (is_live && is_match) {
-        toast.success("🎉 Xác thực khuôn mặt thành công!");
-      } else {
-        if (!is_live) toast.error("❌ Không phải người thật!");
-        if (!is_match) toast.error("❌ Khuôn mặt không trùng khớp!");
-      }
-    } else {
-      toast.error(data.message || "Lỗi kiểm tra liveness");
+      setTimeout(() => {
+        recorder.stop();
+        setAudioRecording(false);
+      }, 5000);
+    } catch {
+      toast.error("Không thể truy cập microphone");
     }
   };
 
-  const verifyVoice = async () => {
-    if (!audioFile) return toast.error("❌ Chưa có file ghi âm!");
+  const handleFullVerification = async () => {
+    if (!videoFile || !audioFile) {
+      toast.error("Vui lòng quay video và ghi âm trước khi xác thực.");
+      return;
+    }
+
+    setLoadingLiveness(true);
     setLoadingVoice(true);
 
-    const formData = new FormData();
-    formData.append("user_id", userId as string);
-    formData.append("file", audioFile);
+    try {
+      // Gửi video để xác thực khuôn mặt
+      const faceForm = new FormData();
+      faceForm.append("userId", userId as string);
+      faceForm.append("video", videoFile);
 
-    const res = await fetch("http://localhost:8000/verify-voice", {
-      method: "POST",
-      body: formData,
-    });
+      const faceRes = await fetch("/api/business/liveness-check", {
+        method: "POST",
+        body: faceForm,
+      });
 
-    const data = await res.json();
-    setLoadingVoice(false);
+      const faceData = await faceRes.json();
+      if (faceRes.ok) {
+        setLivenessResult(faceData);
+        if (faceData.is_live && faceData.is_match) {
+          toast.success("Xác thực khuôn mặt thành công!");
+        } else {
+          if (!faceData.is_live) toast.error("Không phát hiện người thật!");
+          if (!faceData.is_match) toast.error("Khuôn mặt không khớp!");
+        }
+      } else {
+        toast.error(faceData.message || "Lỗi xác thực khuôn mặt");
+      }
 
-    if (res.ok) {
-      setVoiceScore(data.score);
-      toast.success(
-        data.isMatch
-          ? `✅ Giọng nói khớp (${data.score.toFixed(2)})`
-          : `❌ Giọng nói không khớp (${data.score.toFixed(2)})`
-      );
-    } else {
-      toast.error(data.message || "Lỗi xác minh giọng nói");
+      // Gửi audio để xác thực giọng nói
+      const voiceForm = new FormData();
+      voiceForm.append("user_id", userId as string);
+      voiceForm.append("file", audioFile);
+
+      const voiceRes = await fetch("http://localhost:8000/verify-voice", {
+        method: "POST",
+        body: voiceForm,
+      });
+
+      const voiceData = await voiceRes.json();
+      if (voiceRes.ok) {
+        setVoiceScore(voiceData.score);
+        toast.success(
+          voiceData.isMatch
+            ? `Giọng nói khớp (${voiceData.score.toFixed(2)})`
+            : `Giọng nói không khớp (${voiceData.score.toFixed(2)})`
+        );
+      } else {
+        toast.error(voiceData.message || "Lỗi xác thực giọng nói");
+      }
+    } catch {
+      toast.error("Lỗi kết nối máy chủ");
+    } finally {
+      setLoadingLiveness(false);
+      setLoadingVoice(false);
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Xác thực người dùng #{userId}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="relative aspect-[3/4] w-full max-w-sm mx-auto">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  className="w-full h-full rounded-xl border shadow object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-52 h-72 border-4 border-white rounded-full opacity-70" />
-                </div>
-                {recording && countdown > 0 && (
-                  <div className="absolute top-4 right-4 text-white text-3xl font-bold bg-black/50 rounded-full w-12 h-12 flex items-center justify-center">
-                    {countdown}
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-center gap-4 flex-wrap">
-                <Button onClick={toggleCamera}>
-                  {cameraOn ? "📴 Tắt Camera" : "📷 Bật Camera"}
-                </Button>
-                <Button
-                  onClick={startRecording}
-                  disabled={recording}
-                  variant="destructive"
-                >
-                  {recording ? "⏺️ Đang quay..." : "🎥 Quay video"}
-                </Button>
-              </div>
-            </div>
+  const getStepStatus = (step: number) => {
+    if (step < currentStep) return "completed";
+    if (step === currentStep) return "current";
+    return "pending";
+  };
 
-            <div className="flex flex-col space-y-6">
-              {videoFile && (
-                <>
-                  <p className="text-sm text-gray-600 font-medium">
-                    ✅ Video đã quay:
-                  </p>
-                  <video
-                    ref={playbackRef}
-                    controls
-                    className="rounded border w-full max-h-72 object-contain"
-                  />
-                  <Button
-                    onClick={verifyLiveness}
-                    className="bg-blue-600 hover:bg-blue-700 text-white w-full"
-                    disabled={loadingLiveness}
+  const progressValue = ((currentStep - 1) / 2) * 100;
+
+  return (
+    <div className="min-h-screen bg-white p-4 mt-20">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-main mb-2">
+            XÁC THỰC NGƯỜI DÙNG
+          </h1>
+          <p className="text-gray-600">Người dùng #{userId}</p>
+          <div className="mt-6">
+            <Progress
+              value={progressValue}
+              className="w-full max-w-md mx-auto"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[450px]">
+          {/* Step 1: Video Recording */}
+          <Card
+            className={`transition-all duration-300 ${currentStep === 1 ? "ring-2 ring-blue-500 shadow-lg" : ""} `}
+          >
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    getStepStatus(1) === "completed"
+                      ? "bg-green-500 text-white"
+                      : getStepStatus(1) === "current"
+                        ? "bg-main text-white"
+                        : "bg-gray-200 text-gray-500"
+                  }`}
+                >
+                  {getStepStatus(1) === "completed" ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    "1"
+                  )}
+                </div>
+                Quay video khuôn mặt
+                {videoFile && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-auto text-xs text-green-600"
                   >
-                    {loadingLiveness
-                      ? "⏳ Đang kiểm tra..."
-                      : "Gửi kiểm tra liveness & đối chiếu"}
-                  </Button>
-                  {livenessResult && (
-                    <div className="text-sm mt-2 bg-blue-50 border p-3 rounded">
-                      Live:{" "}
-                      {livenessResult.is_live ? "✔️ Hợp lệ" : "❌ Không hợp lệ"}
-                      <br />
-                      Face Match:{" "}
-                      {livenessResult.is_match
-                        ? "✔️ Trùng khớp"
-                        : "❌ Không khớp"}
-                      <br />
-                      Similarity: {livenessResult.similarity}
+                    Hoàn thành
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="space-y-3">
+                <div className="relative aspect-[3/4] w-full max-w-[250px] mx-auto bg-gray-100 rounded-xl overflow-hidden">
+                  {/* Show camera feed or recorded video */}
+                  {videoBlob ? (
+                    <video
+                      src={videoBlob}
+                      className="w-full h-full object-cover"
+                      controls
+                    />
+                  ) : (
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+
+                  {!cameraOn && !videoBlob && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Camera className="w-12 h-12 text-gray-400" />
                     </div>
                   )}
-                </>
-              )}
 
-              <div className="mt-6 space-y-4">
-                <Button
-                  onClick={startAudioRecording}
-                  disabled={audioRecording}
-                  className="bg-green-600 hover:bg-green-700 text-white w-full"
+                  {cameraOn && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-32 h-44 border-4 border-white rounded-full opacity-70" />
+                    </div>
+                  )}
+
+                  {recording && countdown > 0 && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xl font-bold rounded-full w-8 h-8 flex items-center justify-center animate-pulse">
+                      {countdown}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-center gap-2 flex-wrap">
+                  {videoBlob ? (
+                    <Button
+                      onClick={resetVideo}
+                      className="flex items-center gap-1 text-xs h-8 px-2"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Quay lại
+                    </Button>
+                  ) : !cameraOn ? (
+                    <Button
+                      onClick={startCamera}
+                      className="flex items-center gap-1 text-xs h-8 px-2"
+                    >
+                      <Camera className="w-3 h-3" />
+                      Bật camera
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={stopCamera}
+                        variant="outline"
+                        className="text-xs h-8 px-2"
+                      >
+                        Tắt camera
+                      </Button>
+                      <Button
+                        onClick={startRecording}
+                        disabled={recording}
+                        className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-xs h-8 px-2"
+                      >
+                        {recording ? (
+                          <Square className="w-3 h-3" />
+                        ) : (
+                          <Play className="w-3 h-3" />
+                        )}
+                        {recording ? "Đang quay..." : "Bắt đầu"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Step 2: Audio Recording */}
+          <Card
+            className={`transition-all duration-300 ${currentStep === 2 ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
+          >
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    getStepStatus(2) === "completed"
+                      ? "bg-green-500 text-white"
+                      : getStepStatus(2) === "current"
+                        ? "bg-main text-white"
+                        : "bg-gray-200 text-gray-500"
+                  }`}
                 >
-                  {audioRecording ? "🎙️ Đang ghi âm..." : "🎤 Ghi âm giọng nói"}
-                </Button>
+                  {getStepStatus(2) === "completed" ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    "2"
+                  )}
+                </div>
+                Ghi âm giọng nói
                 {audioFile && (
-                  <Button
-                    onClick={verifyVoice}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                    disabled={loadingVoice}
+                  <Badge
+                    variant="secondary"
+                    className="ml-auto text-xs text-green-600"
                   >
-                    {loadingVoice
-                      ? "⏳ Đang xác minh giọng nói..."
-                      : "🔊 Gửi xác minh giọng nói"}
-                  </Button>
+                    Hoàn thành
+                  </Badge>
                 )}
-                {voiceScore !== null && (
-                  <div className="text-sm mt-2 bg-purple-50 border p-3 rounded">
-                    Voice Match Score: {voiceScore.toFixed(4)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-center space-y-4">
+                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                  <Mic
+                    className={`w-12 h-12 text-white ${audioRecording ? "animate-pulse" : ""}`}
+                  />
+                </div>
+
+                <div>
+                  <p className="text-gray-600 mb-3 text-xs">
+                    Nói một câu bất kỳ trong 5 giây
+                  </p>
+                  <Button
+                    onClick={startAudioRecording}
+                    disabled={audioRecording || !videoFile}
+                    className="bg-green-500 hover:bg-green-600 text-white text-xs h-8 px-3"
+                  >
+                    {audioRecording ? "Đang ghi âm..." : "Bắt đầu ghi âm"}
+                  </Button>
+                </div>
+
+                {audioFile && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                    <CheckCircle className="w-5 h-5 text-green-500 mx-auto mb-1" />
+                    <p className="text-green-700 text-xs font-medium">
+                      Đã ghi âm thành công!
+                    </p>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          {/* Step 3: Verification */}
+          <Card
+            className={`transition-all duration-300 ${currentStep === 3 ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
+          >
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    getStepStatus(3) === "current"
+                      ? "bg-main text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
+                  {getStepStatus(3) === "completed" ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    "3"
+                  )}
+                </div>
+                Xác thực
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="space-y-4">
+                <div className="flex justify-center mb-2">
+                  <Shield className="w-12 h-12 text-main" />
+                </div>
+
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleFullVerification}
+                    disabled={
+                      !videoFile ||
+                      !audioFile ||
+                      loadingLiveness ||
+                      loadingVoice ||
+                      currentStep < 3
+                    }
+                    className="w-full bg-main hover:bg-blue-700 text-white text-xs h-8"
+                  >
+                    {loadingLiveness || loadingVoice
+                      ? "Đang xác thực..."
+                      : "Xác thực danh tính"}
+                  </Button>
+                </div>
+
+                {(livenessResult || voiceScore !== null) && (
+                  <div className="space-y-3 text-xs">
+                    {livenessResult && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                        <h4 className="text-main font-semibold text-sm">
+                          Kết quả kiểm tra khuôn mặt
+                        </h4>
+
+                        <div className="flex items-center gap-2">
+                          {livenessResult.is_live ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          )}
+                          <span className="font-medium">
+                            Phát hiện người thật:{" "}
+                            {livenessResult.is_live ? "Có" : "Không"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {livenessResult.is_match ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          )}
+                          <span className="font-medium">
+                            Khuôn mặt khớp:{" "}
+                            {livenessResult.is_match ? "Có" : "Không"}
+                          </span>
+                        </div>
+
+                        <p className="text-sm text-gray-600">
+                          Độ tương tự: {livenessResult.similarity.toFixed(3)}%
+                        </p>
+                      </div>
+                    )}
+
+                    {voiceScore !== null && (
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-1">
+                        <h4 className="text-purple-700 font-semibold text-sm">
+                          Kết quả xác thực giọng nói
+                        </h4>
+
+                        <div className="flex items-center gap-2">
+                          {voiceScore > 0.7 ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          )}
+                          <span className="font-medium">
+                            Điểm số: {(voiceScore * 100).toFixed(1)}%
+                          </span>
+                        </div>
+
+                        <p className="text-sm text-gray-600">
+                          {voiceScore > 0.7
+                            ? "Giọng nói khớp"
+                            : "Giọng nói không khớp"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
