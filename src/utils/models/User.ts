@@ -5,9 +5,11 @@ export interface IUser extends Document {
   email: string;
   password: string;
   createdAt: Date;
+  updatedAt: Date;
   role: "admin" | "business" | "user";
   apiKey?: string;
   businessId?: string;
+  isBanned: boolean;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -24,6 +26,8 @@ const UserSchema = new Schema<IUser>({
     },
   },
   createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  isBanned: { type: Boolean, default: false },
 });
 
 const User = models.User || model<IUser>("User", UserSchema);

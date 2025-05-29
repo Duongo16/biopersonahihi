@@ -17,9 +17,9 @@ export async function PATCH(req: NextRequest) {
       process.env.JWT_SECRET || ""
     ) as jwt.JwtPayload;
 
-    if (!decoded || decoded.role !== "business") {
+    if (!decoded || (decoded.role !== "business" && decoded.role !== "admin")) {
       return NextResponse.json(
-        { message: "Chỉ business mới có quyền cập nhật API key." },
+        { message: "Chỉ business hoặc admin mới có quyền cập nhật API key." },
         { status: 403 }
       );
     }

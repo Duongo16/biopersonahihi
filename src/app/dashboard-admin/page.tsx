@@ -7,11 +7,22 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/ui/dialog";
+
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import toast from "react-hot-toast";
 
 type User = {
+  isBanned: boolean;
+  updatedAt: string | number | Date;
   _id: string;
   email: string;
   username: string;
@@ -20,6 +31,9 @@ type User = {
 };
 
 type Business = {
+  isBanned: boolean;
+  updatedAt: string | number | Date;
+  createdAt: string | number | Date;
   _id: string;
   username: string;
   email: string;
@@ -32,6 +46,13 @@ export default function AdminDashboardPage() {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [newApiKey, setNewApiKey] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [newUser, setNewUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "user", // default
+    businessId: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,6 +115,111 @@ export default function AdminDashboardPage() {
       <h1 className="text-3xl font-extrabold mb-4 text-center text-main">
         🛠️ Admin Dashboard 🛠️
       </h1>
+      <div className="flex justify-end mb-4">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-main text-white mb-4">
+              + Thêm người dùng
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Thêm người dùng mới</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+              <Input
+                placeholder="Tên người dùng"
+                value={newUser.username}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, username: e.target.value })
+                }
+              />
+              <Input
+                placeholder="Email"
+                value={newUser.email}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
+              />
+              <Input
+                placeholder="Mật khẩu"
+                type="password"
+                value={newUser.password}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
+              />
+              <select
+                className="border rounded-md p-2"
+                value={newUser.role}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, role: e.target.value })
+                }
+              >
+                <option value="user">User</option>
+                <option value="business">Business</option>
+                <option value="admin">Admin</option>
+              </select>
+              {newUser.role === "user" && (
+                <select
+                  className="border rounded-md p-2"
+                  value={newUser.businessId}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, businessId: e.target.value })
+                  }
+                >
+                  <option value="">-- Chọn doanh nghiệp --</option>
+                  {businesses.map((biz) => (
+                    <option key={biz._id} value={biz._id}>
+                      {biz.username}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={async () => {
+                  try {
+                    const res = await fetch(
+                      `/api/admin/${newUser.role === "user" ? "users" : "businesses"}`,
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(newUser),
+                      }
+                    );
+                    if (res.ok) {
+                      const created = await res.json();
+
+                      if (newUser.role === "user") {
+                        setUsers((prev) => [...prev, created.user]);
+                      } else {
+                        setBusinesses((prev) => [...prev, created.user]);
+                      }
+                      toast.success("✅ Đã tạo người dùng");
+                      setNewUser({
+                        username: "",
+                        email: "",
+                        password: "",
+                        role: "user",
+                        businessId: "",
+                      });
+                    } else {
+                      toast.error("❌ Lỗi khi tạo người dùng");
+                    }
+                  } catch {
+                    toast.error("❌ Có lỗi xảy ra khi gửi yêu cầu");
+                  }
+                }}
+                className="bg-main text-white w-full"
+              >
+                Tạo người dùng
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* USERS TABLE */}
       <Card className="shadow-lg rounded-2xl">
@@ -107,8 +233,10 @@ export default function AdminDashboardPage() {
                 <th className="py-2 px-3">ID</th>
                 <th className="py-2 px-3">Tên</th>
                 <th className="py-2 px-3">Email</th>
-                <th className="py-2 px-3">Đã xác thực</th>
+                <th className="py-2 px-3">eKYC</th>
                 <th className="py-2 px-3">Ngày tạo</th>
+                <th className="py-2 px-3">Ngày cập nhật</th>
+                <th className="py-2 px-3">Trạng thái</th>
               </tr>
             </thead>
             <tbody>
@@ -120,9 +248,17 @@ export default function AdminDashboardPage() {
                   <td className="py-2 px-3">{user._id}</td>
                   <td className="py-2 px-3">{user.username}</td>
                   <td className="py-2 px-3">{user.email}</td>
-                  <td className="py-2 px-3">{user.verified ? "✅" : "❌"}</td>
+                  <td className="py-2 px-3">
+                    {user.verified ? "✅ Enrolled" : "❌ Not yet"}
+                  </td>
                   <td className="py-2 px-3">
                     {new Date(user.createdAt).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-3">
+                    {new Date(user.updatedAt).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-3">
+                    {user.isBanned ? "❌Bị ban" : "✅Hoạt động"}
                   </td>
                 </tr>
               ))}
@@ -143,6 +279,9 @@ export default function AdminDashboardPage() {
                 <th className="py-2 px-3">ID</th>
                 <th className="py-2 px-3">Tên</th>
                 <th className="py-2 px-3">Email</th>
+                <th className="py-2 px-3">Ngày tạo</th>
+                <th className="py-2 px-3">Ngày cập nhật</th>
+                <th className="py-2 px-3">Trạng thái</th>
                 <th className="py-2 px-3">API Key</th>
                 <th className="py-2 px-3">Thao tác</th>
               </tr>
@@ -156,6 +295,15 @@ export default function AdminDashboardPage() {
                   <td className="py-2 px-3">{biz._id}</td>
                   <td className="py-2 px-3">{biz.username}</td>
                   <td className="py-2 px-3">{biz.email}</td>
+                  <td className="py-2 px-3">
+                    {new Date(biz.createdAt).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-3">
+                    {new Date(biz.updatedAt).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-3">
+                    {biz.isBanned ? "❌Bị ban" : "✅Hoạt động"}
+                  </td>
                   <td className="py-2 px-3 w-64">
                     {editingKey === biz._id ? (
                       <Input
