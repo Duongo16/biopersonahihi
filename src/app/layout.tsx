@@ -105,7 +105,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         href={
                           user.role === "business"
                             ? "/dashboard-business"
-                            : "/dashboard"
+                            : user.role === "admin"
+                              ? "dashboard-admin"
+                              : "/dashboard"
                         }
                         className="block px-4 py-2 hover:bg-gray-100"
                         onClick={() => setDropdownOpen(false)}

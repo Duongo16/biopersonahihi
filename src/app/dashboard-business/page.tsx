@@ -70,54 +70,60 @@ export default function BusinessDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-100 to-gray-200 p-8 mt-20">
-      <h1 className="text-3xl text-main font-bold mb-8">Business Dashboard</h1>
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-100 to-gray-200 px-4 sm:px-8 py-12 mt-15">
+      <h1 className="text-2xl sm:text-3xl text-main font-bold mb-8 text-center">
+        Business Dashboard
+      </h1>
 
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-4xl mb-8">
-        <h2 className="text-2xl font-semibold mb-4">API Key</h2>
-        <div className="flex items-center justify-between">
-          <p className="break-all text-gray-700 font-mono">
+      {/* API Key Section */}
+      <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-4xl mb-8">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">API Key</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="break-all text-gray-700 font-mono text-sm sm:text-base">
             {apiKey || "No API Key Available"}
           </p>
           <button
             onClick={handleApiKeyUpdate}
-            className="bg-main text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-main text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
           >
             Update API Key
           </button>
         </div>
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-4xl">
-        <h2 className="text-2xl font-semibold mb-4">User List</h2>
+      {/* User List Section */}
+      <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-4xl">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">User List</h2>
         {users.length > 0 ? (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="border-b-2 p-4 text-left">Username</th>
-                <th className="border-b-2 p-4 text-left">Email</th>
-                <th className="border-b-2 p-4 text-left">Role</th>
-                <th className="border-b-2 p-4 text-left">Created At</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr
-                  key={user._id}
-                  className="hover:bg-gray-100 transition-colors"
-                >
-                  <td className="border-b p-4">{user.username}</td>
-                  <td className="border-b p-4">{user.email}</td>
-                  <td className="border-b p-4">{user.role}</td>
-                  <td className="border-b p-4">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm sm:text-base">
+              <thead>
+                <tr>
+                  <th className="border-b-2 p-3 text-left">Username</th>
+                  <th className="border-b-2 p-3 text-left">Email</th>
+                  <th className="border-b-2 p-3 text-left">Role</th>
+                  <th className="border-b-2 p-3 text-left">Created At</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr
+                    key={user._id}
+                    className="hover:bg-gray-100 transition-colors"
+                  >
+                    <td className="border-b p-3">{user.username}</td>
+                    <td className="border-b p-3">{user.email}</td>
+                    <td className="border-b p-3">{user.role}</td>
+                    <td className="border-b p-3">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="text-gray-600">No users found.</p>
+          <p className="text-gray-600 text-center">No users found.</p>
         )}
       </div>
     </div>

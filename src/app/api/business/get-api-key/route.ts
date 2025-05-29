@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     if (!decoded || decoded.role !== "business") {
       return NextResponse.json(
-        { message: "Chỉ business mới có quyền cập nhật API key." },
+        { message: "Chỉ business mới có quyền xem API key." },
         { status: 403 }
       );
     }
