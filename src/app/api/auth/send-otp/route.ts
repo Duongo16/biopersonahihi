@@ -1,10 +1,8 @@
 // /api/auth/send-otp/route.ts
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import OTPModel from "../../../../utils/models/OTP"; // bạn cần tạo model OTP
 import connectDB from "@/utils/db";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
@@ -18,8 +16,15 @@ export async function POST(req: Request) {
       { otp: otpCode, expiresAt: Date.now() + 5 * 60 * 1000 },
       { upsert: true }
     );
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-    await resend.emails.send({
+    await transporter.sendMail({
       from: "onboarding@resend.dev",
       to: email,
       subject: "BIOPERSONA: Your OTP Code",
