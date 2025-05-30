@@ -40,6 +40,13 @@ import {
   EyeOff,
   Calendar,
   UserPlus,
+  FileText,
+  Clock,
+  Mic,
+  User,
+  Camera,
+  XCircle,
+  CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -52,6 +59,25 @@ type User = {
   updatedAt: string;
   isBanned: boolean;
 };
+
+interface VerificationLog {
+  _id: string;
+  userId: string | null;
+  stepPassed: boolean;
+  timestamp: string;
+  liveness?: {
+    isLive: boolean;
+    spoofProb: number;
+  };
+  faceMatch?: {
+    isMatch: boolean;
+    similarity: number;
+  };
+  voice?: {
+    isMatch: boolean;
+    score: number;
+  };
+}
 
 export default function BusinessDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -67,6 +93,11 @@ export default function BusinessDashboard() {
   );
   const [showApiKey, setShowApiKey] = useState(false);
   const [isUpdatingApiKey, setIsUpdatingApiKey] = useState(false);
+  const [verificationLogs, setVerificationLogs] = useState<VerificationLog[]>(
+    []
+  );
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [filterStatusLog, setFilterStatusLog] = useState("all");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,6 +116,13 @@ export default function BusinessDashboard() {
 
         if (apiResponse.ok) {
           setApiKey(apiData.apiKey || "");
+        }
+
+        const logsResponse = await fetch("/api/business/verification-log");
+        const logsData = await logsResponse.json();
+
+        if (logsResponse.ok) {
+          setVerificationLogs(logsData.logs || []);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -464,8 +502,379 @@ export default function BusinessDashboard() {
   const sidebarItems = [
     { title: "Dashboard", icon: BarChart3, id: "dashboard" },
     { title: "Quản lý User", icon: Users, id: "users" },
+    {
+      title: "Nhật ký xác thực",
+      icon: FileText,
+      id: "verification-logs",
+    },
     { title: "API Key", icon: Key, id: "api-key" },
   ];
+
+  const renderVerificationLogs = () => {
+    const filteredLogs = verificationLogs.filter((log) => {
+      const matchesSearch =
+        (log.userId &&
+          log.userId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        log._id.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilter =
+        filterStatusLog === "all" ||
+        (filterStatusLog === "success" && log.stepPassed) ||
+        (filterStatusLog === "failed" && !log.stepPassed);
+
+      return matchesSearch && matchesFilter;
+    });
+
+    const logStats = {
+      total: verificationLogs.length,
+      success: verificationLogs.filter((log) => log.stepPassed).length,
+      failed: verificationLogs.filter((log) => !log.stepPassed).length,
+      today: verificationLogs.filter(
+        (log) =>
+          new Date(log.timestamp).toDateString() === new Date().toDateString()
+      ).length,
+    };
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Nhật ký xác thực
+          </h2>
+          <p className="text-muted-foreground">
+            Theo dõi các lần xác thực eKYC của người dùng
+          </p>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Tổng xác thực
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{logStats.total}</div>
+              <p className="text-xs text-muted-foreground">
+                Tổng số lần xác thực
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Thành công</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {logStats.success}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {logStats.total > 0
+                  ? Math.round((logStats.success / logStats.total) * 100)
+                  : 0}
+                % tỷ lệ thành công
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Thất bại</CardTitle>
+              <XCircle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {logStats.failed}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {logStats.total > 0
+                  ? Math.round((logStats.failed / logStats.total) * 100)
+                  : 0}
+                % tỷ lệ thất bại
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Hôm nay</CardTitle>
+              <Clock className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {logStats.today}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Xác thực trong ngày
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center space-x-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm kiếm theo User ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Filter className="mr-2 h-4 w-4" />
+                Trạng thái:{" "}
+                {filterStatusLog === "all"
+                  ? "Tất cả"
+                  : filterStatusLog === "success"
+                    ? "Thành công"
+                    : "Thất bại"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-white">
+              <DropdownMenuItem
+                className="hover:bg-gray-200"
+                onClick={() => setFilterStatusLog("all")}
+              >
+                Tất cả
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="hover:bg-gray-200"
+                onClick={() => setFilterStatusLog("success")}
+              >
+                Thành công
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="hover:bg-gray-200"
+                onClick={() => setFilterStatusLog("failed")}
+              >
+                Thất bại
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Verification Logs Table */}
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b bg-muted/50">
+                  <tr>
+                    <th className="h-12 px-4 text-left align-middle font-medium">
+                      User ID
+                    </th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">
+                      Trạng thái
+                    </th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">
+                      Liveness
+                    </th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">
+                      Face Match
+                    </th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">
+                      Voice Match
+                    </th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">
+                      Thời gian
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLogs.length > 0 ? (
+                    filteredLogs.map((log) => (
+                      <tr key={log._id} className="border-b hover:bg-muted/50">
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="font-medium">
+                                {log.userId || "Ẩn danh"}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {log._id}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <Badge
+                            variant={log.stepPassed ? "default" : "destructive"}
+                            style={{
+                              backgroundColor: !log.stepPassed
+                                ? "#fee2e2"
+                                : "#dcfce7",
+                              color: !log.stepPassed ? "#b91c1c" : "#166534",
+                              width: "100%",
+                              border: "none",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: 6,
+                            }}
+                          >
+                            {log.stepPassed ? "Thành công" : "Thất bại"}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          {log.liveness ? (
+                            <div className="flex items-center gap-2">
+                              <Camera className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <Badge
+                                  variant={
+                                    log.liveness.isLive
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="text-xs"
+                                  style={{
+                                    backgroundColor: !log.liveness.isLive
+                                      ? "#fee2e2"
+                                      : "#dcfce7",
+                                    color: !log.liveness.isLive
+                                      ? "#b91c1c"
+                                      : "#166534",
+                                    width: "100%",
+                                    border: "none",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: 6,
+                                  }}
+                                >
+                                  {log.liveness.isLive ? "Live" : "Spoof"}
+                                </Badge>
+                                <div className="text-xs text-muted-foreground">
+                                  Score: {log.liveness.spoofProb.toFixed(3)}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          {log.faceMatch ? (
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <Badge
+                                  variant={
+                                    log.faceMatch.isMatch
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="text-xs"
+                                  style={{
+                                    backgroundColor: !log.faceMatch.isMatch
+                                      ? "#fee2e2"
+                                      : "#dcfce7",
+                                    color: !log.faceMatch.isMatch
+                                      ? "#b91c1c"
+                                      : "#166534",
+                                    width: "100%",
+                                    border: "none",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: 6,
+                                  }}
+                                >
+                                  {log.faceMatch.isMatch ? "Match" : "No Match"}
+                                </Badge>
+                                <div className="text-xs text-muted-foreground">
+                                  Similarity:{" "}
+                                  {log.faceMatch.similarity.toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          {log.voice ? (
+                            <div className="flex items-center gap-2">
+                              <Mic className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <Badge
+                                  variant={
+                                    log.voice.isMatch
+                                      ? "default"
+                                      : "destructive"
+                                  }
+                                  className="text-xs"
+                                  style={{
+                                    backgroundColor: !log.voice.isMatch
+                                      ? "#fee2e2"
+                                      : "#dcfce7",
+                                    color: !log.voice.isMatch
+                                      ? "#b91c1c"
+                                      : "#166534",
+                                    width: "100%",
+                                    border: "none",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: 6,
+                                  }}
+                                >
+                                  {log.voice.isMatch ? "Match" : "No Match"}
+                                </Badge>
+                                <div className="text-xs text-muted-foreground">
+                                  Score: {log.voice.score.toFixed(3)}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="text-sm">
+                                {new Date(log.timestamp).toLocaleDateString()}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(log.timestamp).toLocaleTimeString()}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="p-8 text-center text-muted-foreground"
+                      >
+                        {searchTerm || filterStatusLog !== "all"
+                          ? "Không tìm thấy log nào"
+                          : "Chưa có log xác thực nào"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -475,6 +884,8 @@ export default function BusinessDashboard() {
         return renderUsers();
       case "api-key":
         return renderApiKey();
+      case "verification-logs":
+        return renderVerificationLogs();
       default:
         return renderDashboard();
     }

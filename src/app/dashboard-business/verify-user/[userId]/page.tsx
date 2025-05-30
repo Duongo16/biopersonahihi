@@ -48,7 +48,14 @@ export default function VerifyUserPage() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user",
+        },
+      });
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setCameraOn(true);
@@ -80,7 +87,10 @@ export default function VerifyUserPage() {
     }
 
     const stream = videoRef.current?.srcObject as MediaStream;
-    const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+    const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+      ? "video/webm;codecs=vp9"
+      : "video/webm";
+    const recorder = new MediaRecorder(stream, { mimeType });
     const chunks: Blob[] = [];
 
     recorder.ondataavailable = (e) => {
@@ -202,6 +212,34 @@ export default function VerifyUserPage() {
         );
       } else {
         toast.error(voiceData.message || "Lỗi xác thực giọng nói");
+      }
+
+      // Ghi log xác thực nếu cả hai kết quả đều có
+      if (faceData && voiceData) {
+        await fetch("/api/verification-log", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            stepPassed:
+              faceData.is_live && faceData.is_match && voiceData.isMatch,
+            liveness: {
+              isLive: faceData.is_live === "true" || faceData.is_live === true,
+              spoofProb: parseFloat(faceData?.liveness?.spoof_prob || "0"),
+            },
+            faceMatch: {
+              isMatch:
+                faceData.is_match === "true" || faceData.is_match === true,
+              similarity: parseFloat(faceData?.face_match?.similarity || "0"),
+            },
+            voice: {
+              isMatch: voiceData.isMatch,
+              score: voiceData.score,
+            },
+          }),
+        });
       }
     } catch {
       toast.error("Lỗi kết nối máy chủ");

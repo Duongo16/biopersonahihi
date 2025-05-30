@@ -5,10 +5,9 @@ import FormData from "form-data";
 import axios from "axios";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
-import User from "@/utils/models/User";
-import VerificationLog from "@/utils/models/VerificationLog";
 
 export async function POST(req: NextRequest) {
+  let videoPath = "";
   try {
     const formData = await req.formData();
     const userId = formData.get("userId") as string;
@@ -23,7 +22,6 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const user = await User.findById(userId);
     const userCCCD = await UserCCCD.findOne({ userId });
     if (!userCCCD || !userCCCD.idFrontUrl) {
       return NextResponse.json(
@@ -36,10 +34,10 @@ export async function POST(req: NextRequest) {
     const uploadDir = path.join(process.cwd(), "public/uploads/liveness");
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-    const videoPath = path.join(uploadDir, `${userId}-live-${Date.now()}.webm`);
+    videoPath = path.join(uploadDir, `${userId}-live-${Date.now()}.webm`);
     fs.writeFileSync(videoPath, Buffer.from(await videoFile.arrayBuffer()));
 
-    const cmndPath = path.join("public", userCCCD.idFrontUrl);
+    const cmndPath = path.join("public", userCCCD.faceUrl);
 
     // 👉 Gửi đến FPT AI
     const form = new FormData();
@@ -64,6 +62,9 @@ export async function POST(req: NextRequest) {
     );
 
     const result = response.data;
+    if (result.code !== 200) {
+      throw new Error(result.message || "Liveness API error");
+    }
 
     const isLive = result?.liveness?.is_live === "true";
     const isMatch = result?.face_match?.isMatch === "true";
@@ -85,29 +86,6 @@ export async function POST(req: NextRequest) {
       spoofProb,
     });
 
-    // 👉 Ghi log
-    await VerificationLog.create({
-      userId,
-      businessId: user?.businessId || null,
-      type: "liveness",
-      stepPassed: isLive,
-      score: similarity,
-      timestamp: new Date(),
-      extra: {
-        isMatch,
-        similarity,
-        spoofProb,
-        warning: result?.liveness?.warning || null,
-      },
-    });
-
-    // 👉 Xóa video sau khi xử lý xong
-    try {
-      fs.unlinkSync(videoPath);
-    } catch (err) {
-      console.warn("⚠️ Không thể xóa video tạm:", videoPath, err);
-    }
-
     return NextResponse.json({
       is_live: isLive,
       is_match: isMatch,
@@ -116,8 +94,15 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("Lỗi kiểm tra liveness:", err);
     return NextResponse.json(
-      { message: "Lỗi kiểm tra liveness" },
+      { message: "Lỗi kiểm tra liveness" + err },
       { status: 500 }
     );
+  } finally {
+    // 👉 Xóa video sau khi xử lý xong
+    try {
+      fs.unlinkSync(videoPath);
+    } catch (err) {
+      console.warn("⚠️ Không thể xóa video tạm:", videoPath, err);
+    }
   }
 }
