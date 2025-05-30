@@ -1,6 +1,46 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "../components/ui/sidebar";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Badge } from "../components/ui/badge";
+import { Label } from "../components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import {
+  BarChart3,
+  Users,
+  Key,
+  Settings,
+  X,
+  Search,
+  Filter,
+  Copy,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Calendar,
+  UserPlus,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 type User = {
@@ -9,122 +49,495 @@ type User = {
   email: string;
   role: string;
   createdAt: string;
+  updatedAt: string;
+  isBanned: boolean;
 };
 
-export default function BusinessDashboardPage() {
+export default function BusinessDashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [users, setUsers] = useState<User[]>([]);
   const [apiKey, setApiKey] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<boolean | undefined>(
+    undefined
+  );
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [isUpdatingApiKey, setIsUpdatingApiKey] = useState(false);
 
   useEffect(() => {
-    const fetchBusinessUsers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/business/users");
-        const data = await response.json();
+        const userResponse = await fetch("/api/business/users");
+        const userData = await userResponse.json();
 
-        if (response.ok) {
-          setUsers(data.users);
+        if (userResponse.ok) {
+          setUsers(userData.users);
         } else {
-          toast.error(data.message);
+          toast.error(userData.message);
+        }
+
+        const apiResponse = await fetch("/api/business/get-api-key");
+        const apiData = await apiResponse.json();
+
+        if (apiResponse.ok) {
+          setApiKey(apiData.apiKey || "");
         }
       } catch (error) {
-        console.error("Error fetching business users:", error);
-        toast.error("Đã xảy ra lỗi khi tải danh sách user.");
+        console.error("Error fetching data:", error);
+        toast.error("Đã xảy ra lỗi khi tải dữ liệu");
+      } finally {
+        setLoading(false);
       }
     };
 
-    const fetchApiKey = async () => {
-      try {
-        const response = await fetch("/api/business/get-api-key");
-        const data = await response.json();
-
-        if (response.ok) {
-          setApiKey(data.apiKey || "");
-        }
-      } catch (error) {
-        console.error("Error fetching API key:", error);
-      }
-    };
-
-    fetchBusinessUsers();
-    fetchApiKey();
+    fetchData();
   }, []);
 
   const handleApiKeyUpdate = async () => {
+    setIsUpdatingApiKey(true);
     try {
       const response = await fetch("/api/business/update-api-key", {
         method: "PATCH",
       });
-
       const data = await response.json();
 
       if (response.ok) {
         setApiKey(data.apiKey);
-        toast.success("API key đã được cập nhật thành công.");
+        toast.success("API key đã được cập nhật thành công");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.error("Error updating API key:", error);
-      toast.error("Đã xảy ra lỗi khi cập nhật API key.");
+      toast.error("Đã xảy ra lỗi khi cập nhật API key");
+    } finally {
+      setIsUpdatingApiKey(false);
+    }
+  };
+
+  const copyApiKey = () => {
+    if (apiKey) {
+      navigator.clipboard.writeText(apiKey);
+      toast.success("API key đã được sao chép");
+    }
+  };
+
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      filterStatus === undefined ? true : user.isBanned === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  const stats = {
+    totalUsers: users.length,
+    usersByRole: users.reduce(
+      (acc, user) => {
+        acc[user.role] = (acc[user.role] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    ),
+    recentUsers: users.filter(
+      (user) =>
+        new Date(user.createdAt) >
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    ).length,
+  };
+
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight text-main">
+          Business Dashboard
+        </h2>
+        <p className="text-muted-foreground">
+          Tổng quan hệ thống quản lý doanh nghiệp
+        </p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tổng Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-main">
+              {stats.totalUsers}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Tổng số người dùng trong hệ thống
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Users mới (7 ngày)
+            </CardTitle>
+            <UserPlus className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-main">
+              {stats.recentUsers}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Người dùng đăng ký trong 7 ngày qua
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              API Key Status
+            </CardTitle>
+            <Key className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold mt-2">
+              <Badge
+                variant={apiKey ? "default" : "destructive"}
+                style={{
+                  backgroundColor: !apiKey ? "#fee2e2" : "#dcfce7",
+                  color: !apiKey ? "#b91c1c" : "#166534",
+                  width: "100%",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 6,
+                }}
+              >
+                {apiKey ? "Hoạt động" : "Chưa có"}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Ngày tạo gần nhất
+            </CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-main">
+              {users.length > 0
+                ? new Date(
+                    Math.max(
+                      ...users.map((u) => new Date(u.createdAt).getTime())
+                    )
+                  ).toLocaleDateString()
+                : "N/A"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              User được tạo gần đây nhất
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderUsers = () => (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight text-main">
+        Quản lý Users
+      </h2>
+      <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm kiếm users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="bg-main text-white">
+            <Button variant="outline">
+              <Filter className="mr-2 h-4 w-4" />
+              Trạng thái:{" "}
+              {filterStatus !== undefined
+                ? !filterStatus
+                  ? "Hoạt động"
+                  : "Bị ban"
+                : "Tất cả"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-white">
+            <DropdownMenuItem
+              className="hover:bg-gray-200"
+              onClick={() => setFilterStatus(undefined)}
+            >
+              Tất cả
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="hover:bg-gray-200"
+              onClick={() => setFilterStatus(false)}
+            >
+              Hoạt động
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="hover:bg-gray-200"
+              onClick={() => setFilterStatus(true)}
+            >
+              Bị ban
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead className=" bg-muted/50">
+                <tr>
+                  <th className="h-12 px-4 text-left font-medium">Username</th>
+                  <th className="h-12 px-4 text-left font-medium">Email</th>
+                  <th className="h-12 px-4 text-left font-medium">Ngày tạo</th>
+                  <th className="h-12 px-4 text-left font-medium">
+                    Ngày cập nhật
+                  </th>
+                  <th className="h-12 px-4 text-left font-medium">ID</th>
+                  <th className="h-12 px-4 text-left font-medium">
+                    Trạng thái
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <tr key={user._id} className=" hover:bg-muted/50">
+                      <td className="p-4 font-medium">{user.username}</td>
+                      <td className="p-4">{user.email}</td>
+                      <td className="p-4 text-sm">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="p-4 text-sm">
+                        {new Date(user.updatedAt).toLocaleDateString()}
+                      </td>
+                      <td className="p-4">
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {user._id}
+                        </code>
+                      </td>
+                      <td className="p-4">
+                        <Badge
+                          variant={user.isBanned ? "destructive" : "default"}
+                          style={{
+                            backgroundColor: user.isBanned
+                              ? "#fee2e2"
+                              : "#dcfce7",
+                            color: user.isBanned ? "#b91c1c" : "#166534",
+                            width: "100%",
+                            border: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {user.isBanned ? "Bị ban" : "Hoạt động"}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="p-8 text-center text-muted-foreground"
+                    >
+                      {searchTerm
+                        ? "Không tìm thấy user nào"
+                        : "Chưa có user nào"}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderApiKey = () => (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight">Quản lý API Key</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" /> API Key hiện tại
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <div className="flex-1">
+              <Label htmlFor="api-key">API Key</Label>
+              <div className="flex items-center space-x-2 mt-1">
+                <Input
+                  id="api-key"
+                  type={showApiKey ? "text" : "password"}
+                  value={apiKey || "Chưa có API Key"}
+                  readOnly
+                  className="font-mono text-sm"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  disabled={!apiKey}
+                >
+                  {showApiKey ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={copyApiKey}
+                  disabled={!apiKey}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between  bg-muted rounded-lg">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                {apiKey
+                  ? "API Key đang hoạt động và sẵn sàng sử dụng"
+                  : "Chưa có API Key"}
+              </p>
+            </div>
+            <Badge
+              variant={!apiKey ? "default" : "destructive"}
+              style={{
+                backgroundColor: !apiKey ? "#fee2e2" : "#dcfce7",
+                color: !apiKey ? "#b91c1c" : "#166534",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {apiKey ? "Hoạt động" : "Chưa có"}
+            </Badge>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleApiKeyUpdate}
+              disabled={isUpdatingApiKey}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isUpdatingApiKey ? "animate-spin" : ""}`}
+              />
+              {apiKey ? "Tạo API Key mới" : "Tạo API Key"}
+            </Button>
+          </div>
+          {apiKey && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                <strong>Lưu ý:</strong> Khi tạo API Key mới, API Key cũ sẽ không
+                còn hoạt động. Hãy đảm bảo cập nhật API Key mới trong ứng dụng
+                của bạn.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const sidebarItems = [
+    { title: "Dashboard", icon: BarChart3, id: "dashboard" },
+    { title: "Quản lý User", icon: Users, id: "users" },
+    { title: "API Key", icon: Key, id: "api-key" },
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return renderDashboard();
+      case "users":
+        return renderUsers();
+      case "api-key":
+        return renderApiKey();
+      default:
+        return renderDashboard();
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-gray-100 to-gray-200 px-4 sm:px-8 py-12 mt-15">
-      <h1 className="text-2xl sm:text-3xl text-main font-bold mb-8 text-center">
-        Business Dashboard
-      </h1>
+    <div className="md:flex mt-20">
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={closeSidebar}
+        />
+      )}
 
-      {/* API Key Section */}
-      <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-4xl mb-8">
-        <h2 className="text-xl sm:text-2xl font-semibold mb-4">API Key</h2>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p className="break-all text-gray-700 font-mono text-sm sm:text-base">
-            {apiKey || "No API Key Available"}
-          </p>
+      <aside
+        className={`fixed md:static z-40 top-0 left-0 h-full w-64 bg-white  transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
+        <div className="flex items-center justify-between px-4 py-2 ">
+          <h1 className="text-lg font-semibold">Business Dashboard</h1>
           <button
-            onClick={handleApiKeyUpdate}
-            className="bg-main text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
+            className="md:hidden p-1 rounded hover:bg-gray-100"
+            onClick={closeSidebar}
           >
-            Update API Key
+            <X className="h-5 w-5" />
           </button>
         </div>
-      </div>
-
-      {/* User List Section */}
-      <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-4xl">
-        <h2 className="text-xl sm:text-2xl font-semibold mb-4">User List</h2>
-        {users.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm sm:text-base">
-              <thead>
-                <tr>
-                  <th className="border-b-2 p-3 text-left">Username</th>
-                  <th className="border-b-2 p-3 text-left">Email</th>
-                  <th className="border-b-2 p-3 text-left">Role</th>
-                  <th className="border-b-2 p-3 text-left">Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr
-                    key={user._id}
-                    className="hover:bg-gray-100 transition-colors"
-                  >
-                    <td className="border-b p-3">{user.username}</td>
-                    <td className="border-b p-3">{user.email}</td>
-                    <td className="border-b p-3">{user.role}</td>
-                    <td className="border-b p-3">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
+        <div className="p-2">
+          <SidebarGroup>
+            <SidebarGroupLabel>Quản lý</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {sidebarItems.map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        closeSidebar();
+                      }}
+                      isActive={activeTab === item.id}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-gray-600 text-center">No users found.</p>
-        )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </div>
+      </aside>
+
+      <div className="flex-1 min-h-screen">
+        <header className="flex items-center gap-2  px-4 md:px-6">
+          <Button variant="ghost" className="md:hidden" onClick={toggleSidebar}>
+            <BarChart3 className="h-5 w-5" />
+          </Button>
+        </header>
+
+        <main className="flex-1 space-y-4 p-4 sm:p-6 md:p-8 pt-6 overflow-auto">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ export async function getAllBusinesses() {
 export async function getBusinessUsers(businessId: string) {
   await connectDB();
   const users = await User.find({ businessId })
-    .select("_id username email createdAt role")
+    .select("_id username email createdAt updatedAt isBanned role")
     .exec();
   return users;
 }

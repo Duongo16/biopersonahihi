@@ -102,6 +102,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Link
+                        href="/profile"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                      <Link
                         href={
                           user.role === "business"
                             ? "/dashboard-business"
@@ -122,7 +131,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         >
                           Xác thực người dùng
                         </Link>
-                      ) : (
+                      ) : user.role === "user" ? (
                         <Link
                           href="/ekyc"
                           className="block px-4 py-2 hover:bg-gray-100"
@@ -130,16 +139,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         >
                           Đăng ký eKYC
                         </Link>
-                      )}
-                      <Link
-                        href="/change-password"
-                        onClick={() => {
-                          setDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      >
-                        Change Password
-                      </Link>
+                      ) : null}
+
                       <button
                         onClick={() => {
                           setDropdownOpen(false);

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import connectDB from "@/utils/db";
+import User from "@/utils/models/User";
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,13 +15,9 @@ export async function GET(req: NextRequest) {
       process.env.JWT_SECRET || ""
     ) as jwt.JwtPayload;
 
-    const user = {
-      id: decoded.id,
-      username: decoded.username,
-      email: decoded.email,
-      role: decoded.role,
-    };
-
+    await connectDB();
+    const user = await User.findById(decoded.id);
+    console.log(user);
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
     console.error("❌ Error in me route:", error);

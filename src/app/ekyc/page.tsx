@@ -23,8 +23,9 @@ export default function EkycFlowPage() {
           credentials: "include",
         });
         const data = await res.json();
-        if (res.ok && data.user?.id) {
-          setUserId(data.user.id);
+
+        if (res.ok && data.user?._id) {
+          setUserId(data.user._id);
         } else {
           toast.error("Không thể xác thực người dùng");
         }
@@ -99,8 +100,8 @@ export default function EkycFlowPage() {
                       isCompleted
                         ? "bg-green-600 text-white"
                         : isActive
-                        ? "bg-main text-white"
-                        : "bg-gray-300 text-gray-700"
+                          ? "bg-main text-white"
+                          : "bg-gray-300 text-gray-700"
                     }`}
                 >
                   {stepNumber}

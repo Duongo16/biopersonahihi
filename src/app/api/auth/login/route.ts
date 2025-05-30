@@ -25,6 +25,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (user.isBanned) {
+      return NextResponse.json(
+        { message: "Tài khoản đã bị ban, không thể đăng nhập" },
+        { status: 404 }
+      );
+    }
+
     // Tạo token JWT
     const token = jwt.sign(
       {
