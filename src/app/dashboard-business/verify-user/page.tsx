@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -182,7 +183,7 @@ export default function VerifyUserPage() {
                       CCCD mặt trước
                     </p>
                     <div className="relative overflow-hidden rounded-lg border bg-gray-100">
-                      <img
+                      <Image
                         src={userCCCD.idFrontUrl || "/placeholder.svg"}
                         alt="CCCD mặt trước"
                         className="w-full h-60 object-cover hover:scale-105 transition-transform duration-200"
@@ -194,7 +195,7 @@ export default function VerifyUserPage() {
                       Ảnh khuôn mặt
                     </p>
                     <div className="relative overflow-hidden rounded-lg border bg-gray-100">
-                      <img
+                      <Image
                         src={userCCCD.faceUrl || "/placeholder.svg"}
                         alt="Ảnh khuôn mặt đã đăng ký"
                         className="w-full h-60 object-cover hover:scale-105 transition-transform duration-200"

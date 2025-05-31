@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Webcam from "react-webcam";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -111,10 +112,13 @@ export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
       {!uploadedImage && (
         <div className="mb-4">
           {capturedImage ? (
-            <img
-              src={capturedImage}
+            <Image
+              src={capturedImage || ""}
               alt="Captured Face"
+              width={640}
+              height={480}
               className="w-full rounded-lg mb-4"
+              unoptimized
             />
           ) : (
             <Webcam

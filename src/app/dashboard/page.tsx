@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCCCDInfo, CCCDInfo } from "../lib/user";
+import Image from "next/image";
 
 export default function Dashboard() {
   const [cccdInfo, setCccdInfo] = useState<CCCDInfo | null>(null);
@@ -51,12 +52,12 @@ export default function Dashboard() {
               </span>
             </p>
             <div className="flex gap-4 mt-4 flex-wrap">
-              <img
+              <Image
                 src={cccdInfo.idFrontUrl}
                 alt="Mặt trước CCCD"
                 className="w-44 rounded-md "
               />
-              <img
+              <Image
                 src={cccdInfo.idBackUrl}
                 alt="Mặt sau CCCD"
                 className="w-44 rounded-md "
@@ -70,7 +71,7 @@ export default function Dashboard() {
                 Khuôn mặt
               </h2>
               {"faceUrl" in cccdInfo && cccdInfo.faceUrl ? (
-                <img
+                <Image
                   src={cccdInfo.faceUrl}
                   alt="Face"
                   className="w-60 rounded-md  mx-auto"

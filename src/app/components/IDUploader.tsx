@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import Image from "next/image";
 
 export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
   const [idFront, setIdFront] = useState<File | null>(null);
@@ -78,7 +79,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
             onChange={(e) => handleFileChange(e, "front")}
           />
           {idFrontPreview && (
-            <img
+            <Image
               src={idFrontPreview}
               alt="Ảnh CCCD mặt trước"
               className="mt-2 rounded border w-full object-contain max-h-64"
@@ -95,7 +96,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
             onChange={(e) => handleFileChange(e, "back")}
           />
           {idBackPreview && (
-            <img
+            <Image
               src={idBackPreview}
               alt="Ảnh CCCD mặt sau"
               className="mt-2 rounded border w-full object-contain max-h-64"
