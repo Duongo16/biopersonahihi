@@ -18,6 +18,8 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/forms": "^0.5.10",
     "@types/form-data": "^2.2.1",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
