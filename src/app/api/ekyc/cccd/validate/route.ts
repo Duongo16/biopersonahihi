@@ -6,6 +6,7 @@ import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
 import FormData from "form-data";
 import axios from "axios";
+import { getBusinessUsers } from "@/app/lib/business";
 
 export const config = {
   api: {
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
       process.env.JWT_SECRET || ""
     ) as jwt.JwtPayload;
     const userId = decoded.id;
+    console.log(decoded);
 
     // Tải lên file ảnh CCCD
     const formData = await req.formData();
@@ -92,11 +94,23 @@ export async function POST(req: NextRequest) {
       const extractedName = fptData.data[0].name;
       const extractedDOB = fptData.data[0].dob;
 
+      interface BusinessUser {
+        id: string;
+      }
+      const users: BusinessUser[] = await getBusinessUsers(decoded.businessId);
       // Kiểm tra xem số CCCD đã tồn tại hay chưa
-      const duplicateCCCD = await UserCCCD.findOne({ idNumber: extractedID });
+      const userIds = users.map((user: BusinessUser) => user.id);
+      const duplicateCCCD = await UserCCCD.findOne({
+        idNumber: extractedID,
+        userId: { $in: userIds },
+      });
+      console.log(extractedID, decoded.businessId, duplicateCCCD);
       if (duplicateCCCD) {
         return NextResponse.json(
-          { message: "Số CCCD này đã tồn tại. Không thể đăng ký trùng." },
+          {
+            message:
+              "Số CCCD này đã được đăng ký ở doanh nghiệp này. Không thể đăng ký trùng.",
+          },
           { status: 400 }
         );
       }

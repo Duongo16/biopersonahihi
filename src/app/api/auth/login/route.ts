@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
         username: user.username,
         email: user.email,
         role: user.role,
+        businessId: user.businessId,
       },
       process.env.JWT_SECRET || "",
       { expiresIn: "1h" }
