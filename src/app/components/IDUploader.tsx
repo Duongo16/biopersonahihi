@@ -81,6 +81,8 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
           {idFrontPreview && (
             <Image
               src={idFrontPreview}
+              width={300}
+              height={200}
               alt="Ảnh CCCD mặt trước"
               className="mt-2 rounded border w-full object-contain max-h-64"
             />
@@ -98,6 +100,8 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
           {idBackPreview && (
             <Image
               src={idBackPreview}
+              width={300}
+              height={200}
               alt="Ảnh CCCD mặt sau"
               className="mt-2 rounded border w-full object-contain max-h-64"
             />

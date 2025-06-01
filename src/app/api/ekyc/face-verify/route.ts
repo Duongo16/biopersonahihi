@@ -57,17 +57,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Lưu file tạm để gửi tới FPT.AI
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "faces");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const faceFileName = `${userId}-face-${Date.now()}.${
-      faceImage.type.split("/")[1]
-    }`;
-    const faceFilePath = path.join(uploadDir, faceFileName);
-    fs.writeFileSync(faceFilePath, Buffer.from(await faceImage.arrayBuffer()));
+    const faceImageBuffer = Buffer.from(await faceImage.arrayBuffer());
 
     // Gửi ảnh khuôn mặt tới FPT.AI Check Face API
     const form = new FormData();
@@ -77,7 +67,10 @@ export async function POST(req: NextRequest) {
         path.join(process.cwd(), "public", userCCCD.idFrontUrl)
       )
     );
-    form.append("file[]", fs.createReadStream(faceFilePath));
+    form.append("file[]", faceImageBuffer, {
+      filename: "faceImage.jpg",
+      contentType: faceImage.type,
+    });
 
     const fptResponse = await axios.post(
       "https://api.fpt.ai/dmp/checkface/v1",
@@ -95,6 +88,19 @@ export async function POST(req: NextRequest) {
 
     // Kiểm tra kết quả xác minh khuôn mặt
     if (fptData && fptData.data && fptData.data.similarity >= 80) {
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "faces");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const faceFileName = `${userId}-face-${Date.now()}.${
+        faceImage.type.split("/")[1]
+      }`;
+      const faceFilePath = path.join(uploadDir, faceFileName);
+      fs.writeFileSync(
+        faceFilePath,
+        Buffer.from(await faceImage.arrayBuffer())
+      );
       // Lưu ảnh khuôn mặt nếu xác minh thành công
       userCCCD.faceUrl = `/uploads/faces/${faceFileName}`;
       await userCCCD.save();

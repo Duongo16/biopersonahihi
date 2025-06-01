@@ -54,26 +54,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Lưu file tạm để gửi tới FPT.AI
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const frontFileName = `${userId}-id-front-${Date.now()}.${
-      idFront.type.split("/")[1]
-    }`;
-    const backFileName = `${userId}-id-back-${Date.now()}.${
-      idBack.type.split("/")[1]
-    }`;
-    const frontFilePath = path.join(uploadDir, frontFileName);
-    const backFilePath = path.join(uploadDir, backFileName);
-    fs.writeFileSync(frontFilePath, Buffer.from(await idFront.arrayBuffer()));
-    fs.writeFileSync(backFilePath, Buffer.from(await idBack.arrayBuffer()));
-
     // Gửi ảnh mặt trước tới FPT.AI ID Recognition API
+    const frontBuffer = Buffer.from(await idFront.arrayBuffer());
     const form = new FormData();
-    form.append("image", fs.createReadStream(frontFilePath));
+    form.append("image", frontBuffer, {
+      filename: "id-front.jpg",
+      contentType: idFront.type,
+    });
     form.append("type", "identity_card");
 
     const fptResponse = await axios.post(
@@ -114,6 +101,19 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadDir))
+        fs.mkdirSync(uploadDir, { recursive: true });
+
+      const frontFileName = `${userId}-id-front-${Date.now()}.${idFront.type.split("/")[1]}`;
+      const backFileName = `${userId}-id-back-${Date.now()}.${idBack.type.split("/")[1]}`;
+
+      const frontPath = path.join(uploadDir, frontFileName);
+      const backPath = path.join(uploadDir, backFileName);
+
+      fs.writeFileSync(frontPath, frontBuffer);
+      fs.writeFileSync(backPath, Buffer.from(await idBack.arrayBuffer()));
 
       // Lưu thông tin CCCD vào database
       await connectDB();
