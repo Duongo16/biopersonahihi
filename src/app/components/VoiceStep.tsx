@@ -91,7 +91,7 @@ export default function VoiceStep({ userId, onSuccess }: VoiceStepProps) {
 
         if (response.ok) {
           const data = await response.json();
-          if (data.voiceVector) {
+          if (data.voiceVector && data.voiceVector.length > 0) {
             setVoiceExist(true);
           }
         }

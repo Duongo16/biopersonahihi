@@ -46,7 +46,7 @@ export default function EkycFlowPage() {
           setHasCCCD(true);
           setCompletedSteps([1]);
           const data = await response.json();
-          if (data.voiceVector) {
+          if (data.voiceVector && data.voiceVector.length > 0) {
             setCompletedSteps([1, 2, 3]);
           } else if (data.faceUrl) {
             setStep(3);
