@@ -18,7 +18,13 @@ export default function Dashboard() {
   }, []);
 
   if (loading)
-    return <div className="p-10 text-center">Đang tải dữ liệu...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-main text-lg font-semibold animate-pulse">
+          Đang tải thông tin người dùng...
+        </div>
+      </div>
+    );
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-6xl mx-auto mt-20">
@@ -55,11 +61,15 @@ export default function Dashboard() {
               <Image
                 src={cccdInfo.idFrontUrl}
                 alt="Mặt trước CCCD"
+                width={400}
+                height={250}
                 className="w-44 rounded-md "
               />
               <Image
                 src={cccdInfo.idBackUrl}
                 alt="Mặt sau CCCD"
+                width={400}
+                height={250}
                 className="w-44 rounded-md "
               />
             </div>
@@ -74,6 +84,8 @@ export default function Dashboard() {
                 <Image
                   src={cccdInfo.faceUrl}
                   alt="Face"
+                  width={400}
+                  height={250}
                   className="w-60 rounded-md  mx-auto"
                 />
               ) : (

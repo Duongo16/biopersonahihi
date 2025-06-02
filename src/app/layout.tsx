@@ -183,6 +183,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {user &&
           user.role == "user" &&
           ekycDone !== null &&
+          pathname !== "/profile" &&
           pathname !== "/ekyc" &&
           pathname !== "/dashboard" && (
             <div className="pt-15 flex justify-center z-40 absolute w-full">

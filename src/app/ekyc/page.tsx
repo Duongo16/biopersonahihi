@@ -10,6 +10,9 @@ export default function EkycFlowPage() {
   const [step, setStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [hasCCCD, setHasCCCD] = useState(false);
+  const [hasFace, setHasFace] = useState(false);
+  const [hasVoice, setHasVoice] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [userId, setUserId] = useState<string>("");
 
@@ -18,15 +21,16 @@ export default function EkycFlowPage() {
   useEffect(() => {
     const fetchUserId = async () => {
       try {
-        const res = await fetch("/api/auth/me", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API}/auth/me`, {
           method: "GET",
           credentials: "include",
         });
         const data = await res.json();
 
-        if (res.ok && data.user?._id) {
-          setUserId(data.user._id);
+        if (res.ok && data.user?.id) {
+          setUserId(data.user.id);
         } else {
+          console.log(res);
           toast.error("Không thể xác thực người dùng");
         }
       } catch (err) {
@@ -37,24 +41,33 @@ export default function EkycFlowPage() {
 
     const checkExistingCCCD = async () => {
       try {
-        const response = await fetch("/api/ekyc/cccd/info", {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/cccd-info`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         if (response.ok) {
           setHasCCCD(true);
           setCompletedSteps([1]);
           const data = await response.json();
-          if (data.voiceVector && data.voiceVector.length > 0) {
+          console.log(data);
+          if (data.faceUrl && data.voiceVector && data.voiceVector.length > 0) {
+            setHasFace(true);
+            setHasVoice(true);
             setCompletedSteps([1, 2, 3]);
           } else if (data.faceUrl) {
+            setHasFace(true);
             setStep(3);
             setCompletedSteps([1, 2]);
           } else setStep(2);
         }
       } catch (error) {
         console.error("❌ Lỗi kiểm tra CCCD:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -75,6 +88,16 @@ export default function EkycFlowPage() {
       toast.error("Vui lòng hoàn thành bước đăng ký CCCD trước.");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-main text-lg font-semibold animate-pulse">
+          Đang tải thông tin người dùng...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -122,6 +145,7 @@ export default function EkycFlowPage() {
         <div className="bg-white shadow-lg rounded-lg p-6">
           {step === 1 && (
             <CCCDStep
+              hasCCCD={hasCCCD}
               onSuccess={() => {
                 setHasCCCD(true);
                 markStepComplete(1);
@@ -130,6 +154,7 @@ export default function EkycFlowPage() {
           )}
           {step === 2 && (
             <FaceStep
+              hasFace={hasFace}
               onSuccess={() => {
                 markStepComplete(2);
               }}
@@ -137,6 +162,7 @@ export default function EkycFlowPage() {
           )}
           {step === 3 && userId && (
             <VoiceStep
+              hasVoice={hasVoice}
               userId={userId}
               onSuccess={() => {
                 markStepComplete(3);

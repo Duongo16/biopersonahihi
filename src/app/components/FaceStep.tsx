@@ -1,16 +1,21 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Webcam from "react-webcam";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
-export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
+export default function FaceStep({
+  hasFace,
+  onSuccess,
+}: {
+  hasFace: boolean;
+  onSuccess: () => void;
+}) {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const webcamRef = useRef<Webcam>(null);
-  const [faceExists, setFaceExists] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const captureImage = () => {
     if (webcamRef.current) {
@@ -37,7 +42,7 @@ export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
       toast.error("Vui lòng chọn hoặc chụp ảnh khuôn mặt.");
       return;
     }
-
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append(
@@ -46,11 +51,14 @@ export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
           new File([imageFile], "face.png", { type: "image/png" })
       );
 
-      const response = await fetch("/api/ekyc/face-verify", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/face-verify`,
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       const data = await response.json();
 
@@ -60,40 +68,14 @@ export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
         );
         onSuccess();
       } else {
-        toast.error(data.message || "Xác minh khuôn mặt thất bại.");
+        toast.error(data.detail || "Xác minh khuôn mặt thất bại.");
       }
     } catch (error) {
       console.error("Error verifying face:", error);
       toast.error("Đã xảy ra lỗi khi xác minh khuôn mặt.");
     }
   };
-
-  useEffect(() => {
-    const checkFace = async () => {
-      try {
-        const response = await fetch("/api/ekyc/cccd/info", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.faceUrl) {
-            setFaceExists(true);
-          }
-        }
-      } catch (error) {
-        console.error("❌ Error checking CCCD:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkFace();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (faceExists) {
+  if (hasFace) {
     return (
       <div className="text-center bg-green-100 border border-green-500 text-green-700 p-4 rounded-lg">
         <h2 className="text-xl font-semibold mb-2">Khuôn mặt đã đăng ký</h2>
@@ -158,9 +140,10 @@ export default function FaceStep({ onSuccess }: { onSuccess: () => void }) {
 
       <button
         onClick={handleFaceSubmit}
+        disabled={loading}
         className="w-full bg-main text-white p-2 rounded-lg hover:bg-blue-700"
       >
-        Xác minh khuôn mặt
+        {loading ? "Đang xác minh..." : "Xác minh khuôn mặt"}
       </button>
     </div>
   );

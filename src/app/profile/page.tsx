@@ -80,8 +80,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API}/auth/me`, {
+          method: "GET",
+          credentials: "include",
+        });
         const data = await res.json();
+        console.log(data);
         if (res.ok) {
           setUser(data.user);
           setFormData({
@@ -179,8 +183,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">🔄 Đang tải dữ liệu...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-main text-lg font-semibold animate-pulse">
+          Đang tải thông tin người dùng...
+        </div>
       </div>
     );
   }
@@ -226,8 +232,15 @@ export default function ProfilePage() {
               <h3 className="text-xl font-semibold">{user.username}</h3>
               <p className="text-muted-foreground">{user.email}</p>
               <div className="flex items-center gap-2 mt-2">
-                <Badge variant={user.verified ? "default" : "secondary"}>
-                  {user.verified ? "Đã xác thực" : "Chưa xác thực"}
+                <Badge
+                  variant={user.verified ? "default" : "secondary"}
+                  className={
+                    user.verified
+                      ? "bg-green-600 text-white"
+                      : "bg-yellow-400 text-black"
+                  }
+                >
+                  {user.verified ? "Đã đăng ký" : "Chưa đăng ký"}
                 </Badge>
                 <Badge variant="outline">{user.role || "User"}</Badge>
               </div>
@@ -319,9 +332,9 @@ export default function ProfilePage() {
                 <UserRoundX className="h-8 w-8 text-red-600" />
               )}
               <div>
-                <p className="font-medium">Trạng thái xác thực</p>
+                <p className="font-medium">Trạng thái eKYC</p>
                 <p className="text-sm text-muted-foreground">
-                  {user.verified ? "Đã xác thực email" : "Chưa xác thực"}
+                  {user.verified ? "Đã đăng ký eKYC" : "Chưa đăng ký eKYC"}
                 </p>
               </div>
             </div>

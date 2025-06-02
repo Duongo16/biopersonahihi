@@ -12,6 +12,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
   const [idBack, setIdBack] = useState<File | null>(null);
   const [idFrontPreview, setIdFrontPreview] = useState<string | null>(null);
   const [idBackPreview, setIdBackPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -42,12 +43,16 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
     formData.append("idFront", idFront);
     formData.append("idBack", idBack);
 
+    setLoading(true);
     try {
-      const response = await fetch("/api/ekyc/cccd/validate", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/cccd-register`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -111,9 +116,10 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
 
       <Button
         onClick={handleSubmit}
+        disabled={loading}
         className="w-full bg-main hover:bg-blue-700 text-white"
       >
-        Xác thực CCCD
+        {loading ? "Đang xác thực..." : "Xác thực CCCD"}
       </Button>
     </div>
   );
