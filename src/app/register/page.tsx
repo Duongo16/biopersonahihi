@@ -58,13 +58,17 @@ export default function RegisterPage() {
     try {
       toast.loading("Đang gửi mã xác minh...", { id: "send-otp" });
 
-      const otpRes = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const otpRes = await fetch(
+        `${process.env.NEXT_PUBLIC_AUTH_API}/auth/send-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ email }),
+        }
+      );
 
       toast.dismiss("send-otp");
 

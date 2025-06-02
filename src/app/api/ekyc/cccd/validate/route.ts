@@ -1,12 +1,14 @@
 import { NextResponse, NextRequest } from "next/server";
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
 import FormData from "form-data";
 import axios from "axios";
 import { getBusinessUsers } from "@/app/lib/business";
+import cloudinary from "@/utils/cloudinary";
+import { fileToDataUri } from "@/utils/clound-file";
 
 export const config = {
   api: {
@@ -102,28 +104,44 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      if (!fs.existsSync(uploadDir))
-        fs.mkdirSync(uploadDir, { recursive: true });
+      //Upload ảnh vào public local
+      // const uploadDir = path.join(process.cwd(), "public", "uploads");
+      // if (!fs.existsSync(uploadDir))
+      //   fs.mkdirSync(uploadDir, { recursive: true });
 
-      const frontFileName = `${userId}-id-front-${Date.now()}.${idFront.type.split("/")[1]}`;
-      const backFileName = `${userId}-id-back-${Date.now()}.${idBack.type.split("/")[1]}`;
+      // const frontFileName = `/uploads/${userId}-id-front-${Date.now()}.${idFront.type.split("/")[1]}`;
+      // const backFileName = `/uploads/${userId}-id-back-${Date.now()}.${idBack.type.split("/")[1]}`;
 
-      const frontPath = path.join(uploadDir, frontFileName);
-      const backPath = path.join(uploadDir, backFileName);
+      // const frontPath = path.join(uploadDir, frontFileName);
+      // const backPath = path.join(uploadDir, backFileName);
 
-      fs.writeFileSync(frontPath, frontBuffer);
-      fs.writeFileSync(backPath, Buffer.from(await idBack.arrayBuffer()));
+      // fs.writeFileSync(frontPath, frontBuffer);
+      // fs.writeFileSync(backPath, Buffer.from(await idBack.arrayBuffer()));
 
-      // Lưu thông tin CCCD vào database
+      //Upload lên clound
+      const frontDataUri = await fileToDataUri(idFront);
+      const frontResult = await cloudinary.uploader.upload(frontDataUri, {
+        folder: "biopersona/id-fronts",
+        public_id: `${userId}-id-front-${Date.now()}`,
+      });
+
+      const backDataUri = await fileToDataUri(idBack);
+      const backResult = await cloudinary.uploader.upload(backDataUri, {
+        folder: "biopersona/id-backs",
+        public_id: `${userId}-id-back-${Date.now()}`,
+      });
+
+      const frontFileName = frontResult.secure_url;
+      const backFileName = backResult.secure_url;
+
       await connectDB();
       const newUserCCCD = new UserCCCD({
         userId,
         idNumber: extractedID,
         fullName: extractedName,
         dateOfBirth: extractedDOB,
-        idFrontUrl: `/uploads/${frontFileName}`,
-        idBackUrl: `/uploads/${backFileName}`,
+        idFrontUrl: frontFileName,
+        idBackUrl: backFileName,
         verified: true,
       });
 
@@ -134,8 +152,8 @@ export async function POST(req: NextRequest) {
         extractedID,
         extractedName,
         extractedDOB,
-        frontUrl: `/uploads/${frontFileName}`,
-        backUrl: `/uploads/${backFileName}`,
+        frontUrl: frontFileName,
+        backUrl: backFileName,
       });
     }
 

@@ -41,14 +41,17 @@ export default function LoginPage() {
     try {
       toast.loading("Đang đăng nhập...", { id: "login" });
 
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, rememberMe }),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_AUTH_API}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password, rememberMe }),
+          credentials: "include",
+        }
+      );
 
       const data = await response.json();
 
@@ -57,10 +60,13 @@ export default function LoginPage() {
         toast.success(data.message || "Đăng nhập thành công! 🎉");
 
         // Lấy thông tin người dùng
-        const userResponse = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-        });
+        const userResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_AUTH_API}/auth/me`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
         const userData = await userResponse.json();
 
         if (userResponse.ok) {
@@ -70,7 +76,7 @@ export default function LoginPage() {
         router.push("/");
       } else {
         toast.dismiss("login");
-        toast.error(data.message || "Đăng nhập thất bại.");
+        toast.error(data.detail || "Đăng nhập thất bại.");
       }
     } catch (error) {
       console.error("❌ Error during login:", error);

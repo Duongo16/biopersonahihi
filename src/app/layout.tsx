@@ -48,10 +48,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_AUTH_API}/auth/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
       const data = await response.json();
 
       if (response.ok) {

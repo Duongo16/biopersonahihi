@@ -9,7 +9,7 @@ export default function useFetchUserOnce() {
     if (!user && !fetched.current) {
       fetched.current = true;
 
-      fetch("/api/auth/me", {
+      fetch(`${process.env.NEXT_PUBLIC_AUTH_API}/auth/me`, {
         method: "GET",
         credentials: "include",
       })

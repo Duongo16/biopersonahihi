@@ -34,11 +34,15 @@ export default function VerifyOtpPage() {
     const payload = JSON.parse(localData);
 
     // Bước 1: xác minh OTP
-    const verifyRes = await fetch("/api/auth/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: payload.email, otp }),
-    });
+    const verifyRes = await fetch(
+      `${process.env.NEXT_PUBLIC_AUTH_API}/auth/verify-otp`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: payload.email, otp }),
+      }
+    );
 
     if (!verifyRes.ok) {
       const data = await verifyRes.json();
@@ -48,12 +52,15 @@ export default function VerifyOtpPage() {
 
     // Bước 2: gửi đăng ký thực sự
     const registerEndpoint =
-      mode === "user" ? "/api/auth/register" : "/api/auth/register-business";
+      mode === "user"
+        ? `${process.env.NEXT_PUBLIC_AUTH_API}/auth/register`
+        : `${process.env.NEXT_PUBLIC_AUTH_API}/auth/register-business`;
 
     const registerRes = await fetch(registerEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      credentials: "include",
     });
 
     const resData = await registerRes.json();

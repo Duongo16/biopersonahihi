@@ -1,11 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
 import FormData from "form-data";
 import axios from "axios";
+import cloudinary from "@/utils/cloudinary";
+import { fileToDataUri } from "@/utils/clound-file";
 
 export const config = {
   api: {
@@ -61,12 +63,15 @@ export async function POST(req: NextRequest) {
 
     // Gửi ảnh khuôn mặt tới FPT.AI Check Face API
     const form = new FormData();
-    form.append(
-      "file[]",
-      fs.createReadStream(
-        path.join(process.cwd(), "public", userCCCD.idFrontUrl)
-      )
-    );
+    // form.append(
+    //   "file[]",
+    //   fs.createReadStream(
+    //     path.join(process.cwd(), "public", userCCCD.idFrontUrl)
+    //   )
+    // );
+    const imageUrl = userCCCD.idFrontUrl;
+    const imageStream = await axios.get(imageUrl, { responseType: "stream" });
+    form.append("file[]", imageStream.data, { filename: "id-front.jpg" });
     form.append("file[]", faceImageBuffer, {
       filename: "faceImage.jpg",
       contentType: faceImage.type,
@@ -88,21 +93,28 @@ export async function POST(req: NextRequest) {
 
     // Kiểm tra kết quả xác minh khuôn mặt
     if (fptData && fptData.data && fptData.data.similarity >= 80) {
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "faces");
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+      // const uploadDir = path.join(process.cwd(), "public", "uploads", "faces");
+      // if (!fs.existsSync(uploadDir)) {
+      //   fs.mkdirSync(uploadDir, { recursive: true });
+      // }
 
-      const faceFileName = `${userId}-face-${Date.now()}.${
-        faceImage.type.split("/")[1]
-      }`;
-      const faceFilePath = path.join(uploadDir, faceFileName);
-      fs.writeFileSync(
-        faceFilePath,
-        Buffer.from(await faceImage.arrayBuffer())
-      );
+      // const faceFileName = `/uploads/faces/${userId}-face-${Date.now()}.${
+      //   faceImage.type.split("/")[1]
+      // }`;
+      // const faceFilePath = path.join(uploadDir, faceFileName);
+      // fs.writeFileSync(
+      //   faceFilePath,
+      //   Buffer.from(await faceImage.arrayBuffer())
+      // );
+
+      const faceImageUri = await fileToDataUri(faceImage);
+      const faceImageResult = await cloudinary.uploader.upload(faceImageUri, {
+        folder: "biopersona/face-url",
+        public_id: `${userId}-face-url-${Date.now()}`,
+      });
+      const faceFileName = faceImageResult.secure_url;
       // Lưu ảnh khuôn mặt nếu xác minh thành công
-      userCCCD.faceUrl = `/uploads/faces/${faceFileName}`;
+      userCCCD.faceUrl = faceFileName;
       await userCCCD.save();
 
       return NextResponse.json({

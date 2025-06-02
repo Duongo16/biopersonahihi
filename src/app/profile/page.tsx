@@ -106,11 +106,15 @@ export default function ProfilePage() {
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
     try {
-      const res = await fetch("/api/auth/update-account", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_AUTH_API}/auth/update-account`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: formData.username }),
+          credentials: "include",
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         toast.success("✅ Cập nhật thông tin thành công!");
@@ -122,7 +126,7 @@ export default function ProfilePage() {
         }
         setIsEditing(false);
       } else {
-        toast.error(data.message || "❌ Lỗi cập nhật");
+        toast.error(data.detail || "❌ Lỗi cập nhật hihi");
       }
     } catch {
       toast.error("Không thể kết nối server");
@@ -142,14 +146,18 @@ export default function ProfilePage() {
     }
     setIsUpdating(true);
     try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_AUTH_API}/auth/change-password`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            currentPassword: formData.currentPassword,
+            newPassword: formData.newPassword,
+          }),
+          credentials: "include",
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         toast.success("✅ Đổi mật khẩu thành công!");
