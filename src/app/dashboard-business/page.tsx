@@ -102,7 +102,9 @@ export default function BusinessDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userResponse = await fetch("/api/business/users");
+        const userResponse = await fetch("/api/business/users", {
+          credentials: "include",
+        });
         const userData = await userResponse.json();
 
         if (userResponse.ok) {
@@ -111,14 +113,18 @@ export default function BusinessDashboard() {
           toast.error(userData.message);
         }
 
-        const apiResponse = await fetch("/api/business/get-api-key");
+        const apiResponse = await fetch("/api/business/get-api-key", {
+          credentials: "include",
+        });
         const apiData = await apiResponse.json();
 
         if (apiResponse.ok) {
           setApiKey(apiData.apiKey || "");
         }
 
-        const logsResponse = await fetch("/api/business/verification-log");
+        const logsResponse = await fetch("/api/business/verification-log", {
+          credentials: "include",
+        });
         const logsData = await logsResponse.json();
 
         if (logsResponse.ok) {
@@ -140,6 +146,7 @@ export default function BusinessDashboard() {
     try {
       const response = await fetch("/api/business/update-api-key", {
         method: "PATCH",
+        credentials: "include",
       });
       const data = await response.json();
 
