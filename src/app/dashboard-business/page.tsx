@@ -755,7 +755,10 @@ export default function BusinessDashboard() {
                                   {log.liveness.isLive ? "Live" : "Spoof"}
                                 </Badge>
                                 <div className="text-xs text-muted-foreground">
-                                  Score: {log.liveness.spoofProb.toFixed(3)}
+                                  Score:{" "}
+                                  {log.liveness.spoofProb !== undefined
+                                    ? log.liveness.spoofProb.toFixed(3)
+                                    : "N/A"}
                                 </div>
                               </div>
                             </div>
@@ -794,7 +797,9 @@ export default function BusinessDashboard() {
                                 </Badge>
                                 <div className="text-xs text-muted-foreground">
                                   Similarity:{" "}
-                                  {log.faceMatch.similarity.toFixed(2)}
+                                  {log.faceMatch.similarity !== undefined
+                                    ? log.faceMatch.similarity.toFixed(2)
+                                    : "N/A"}
                                 </div>
                               </div>
                             </div>
@@ -832,7 +837,10 @@ export default function BusinessDashboard() {
                                   {log.voice.isMatch ? "Match" : "No Match"}
                                 </Badge>
                                 <div className="text-xs text-muted-foreground">
-                                  Score: {log.voice.score.toFixed(3)}
+                                  Score:{" "}
+                                  {log.voice.score !== undefined
+                                    ? log.voice.score.toFixed(3)
+                                    : "N/A"}
                                 </div>
                               </div>
                             </div>

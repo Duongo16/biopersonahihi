@@ -186,6 +186,8 @@ export default function VerifyUserPage() {
                       <Image
                         src={userCCCD.idFrontUrl || "/placeholder.svg"}
                         alt="CCCD mặt trước"
+                        width={300}
+                        height={300}
                         className="w-full h-60 object-cover hover:scale-105 transition-transform duration-200"
                       />
                     </div>
@@ -198,6 +200,8 @@ export default function VerifyUserPage() {
                       <Image
                         src={userCCCD.faceUrl || "/placeholder.svg"}
                         alt="Ảnh khuôn mặt đã đăng ký"
+                        width={300}
+                        height={300}
                         className="w-full h-60 object-cover hover:scale-105 transition-transform duration-200"
                       />
                     </div>

@@ -174,10 +174,13 @@ export default function VerifyUserPage() {
       faceForm.append("userId", userId as string);
       faceForm.append("video", videoFile);
 
-      const faceRes = await fetch("/api/business/liveness-check", {
-        method: "POST",
-        body: faceForm,
-      });
+      const faceRes = await fetch(
+        `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/liveness-check`,
+        {
+          method: "POST",
+          body: faceForm,
+        }
+      );
 
       const faceData = await faceRes.json();
       if (faceRes.ok) {
@@ -197,10 +200,13 @@ export default function VerifyUserPage() {
       voiceForm.append("user_id", userId as string);
       voiceForm.append("file", audioFile);
 
-      const voiceRes = await fetch("http://localhost:8000/verify-voice", {
-        method: "POST",
-        body: voiceForm,
-      });
+      const voiceRes = await fetch(
+        `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/voice-verify`,
+        {
+          method: "POST",
+          body: voiceForm,
+        }
+      );
 
       const voiceData = await voiceRes.json();
       if (voiceRes.ok) {
@@ -216,30 +222,34 @@ export default function VerifyUserPage() {
 
       // Ghi log xác thực nếu cả hai kết quả đều có
       if (faceData && voiceData) {
-        await fetch("/api/verification-log", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            stepPassed:
-              faceData.is_live && faceData.is_match && voiceData.isMatch,
-            liveness: {
-              isLive: faceData.is_live === "true" || faceData.is_live === true,
-              spoofProb: parseFloat(faceData?.liveness?.spoof_prob || "0"),
+        await fetch(
+          `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/verification-log`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-            faceMatch: {
-              isMatch:
-                faceData.is_match === "true" || faceData.is_match === true,
-              similarity: parseFloat(faceData?.face_match?.similarity || "0"),
-            },
-            voice: {
-              isMatch: voiceData.isMatch,
-              score: voiceData.score,
-            },
-          }),
-        });
+            body: JSON.stringify({
+              userId,
+              stepPassed:
+                faceData.is_live && faceData.is_match && voiceData.isMatch,
+              liveness: {
+                isLive:
+                  faceData.is_live === "true" || faceData.is_live === true,
+                spoofProb: faceData.spoofProb,
+              },
+              faceMatch: {
+                isMatch:
+                  faceData.is_match === "true" || faceData.is_match === true,
+                similarity: faceData.similarity,
+              },
+              voice: {
+                isMatch: voiceData.isMatch,
+                score: voiceData.score,
+              },
+            }),
+          }
+        );
       }
     } catch {
       toast.error("Lỗi kết nối máy chủ");
@@ -534,7 +544,10 @@ export default function VerifyUserPage() {
                         </div>
 
                         <p className="text-sm text-gray-600">
-                          Độ tương tự: {livenessResult.similarity.toFixed(3)}%
+                          Độ tương tự:{" "}
+                          {typeof livenessResult?.similarity === "number"
+                            ? `${livenessResult.similarity.toFixed(2)}%`
+                            : "N/A"}
                         </p>
                       </div>
                     )}

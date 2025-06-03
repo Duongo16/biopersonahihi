@@ -20,24 +20,37 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [ekycDone, setEkycDone] = useState<boolean | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useFetchUserOnce();
-
-  useEffect(() => {
-    const checkEkycDone = async () => {
-      try {
-        const res = await fetch("/api/ekyc/enrolled", {
+  const checkEkycDone = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/cccd-info`,
+        {
           method: "GET",
           credentials: "include",
-        });
-        const data = await res.json();
-        setEkycDone(data.done);
-      } catch {
-        setEkycDone(null);
+        }
+      );
+      const data = await res.json();
+      console.log(data);
+      if (data.faceUrl && data.voiceVector && data.voiceVector.length > 0) {
+        setEkycDone(true);
+      } else {
+        setEkycDone(false);
       }
-    };
+    } catch {
+      setEkycDone(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     if (user) checkEkycDone();
-    else setEkycDone(null);
+    else {
+      setEkycDone(null);
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -67,6 +80,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       alert("Đã xảy ra lỗi. Vui lòng thử lại.");
     }
   };
+
+  if (loading) {
+    return (
+      <html lang="en">
+        <body>
+          <div className="min-h-screen flex items-center justify-center bg-main">
+            <Image
+              src="/logo.png"
+              alt="Loading Logo"
+              width={300}
+              height={300}
+              className="animate-pulse"
+            />
+          </div>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en">
