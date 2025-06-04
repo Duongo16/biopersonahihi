@@ -915,6 +915,16 @@ export default function BusinessDashboard() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-main text-lg font-semibold animate-pulse">
+          Đang tải thông tin người dùng...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="md:flex mt-20">
       {isSidebarOpen && (

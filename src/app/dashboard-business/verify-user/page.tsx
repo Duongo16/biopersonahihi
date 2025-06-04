@@ -49,7 +49,11 @@ export default function VerifyUserPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/business/user-cccd?userId=${userId}`);
+      const res = await fetch(`/api/business/user-cccd?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = await res.json();
       if (res.ok) {
         setUserCCCD(data.cccd);
