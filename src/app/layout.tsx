@@ -29,6 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/cccd-info`,
         {
           method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
           credentials: "include",
         }
       );
