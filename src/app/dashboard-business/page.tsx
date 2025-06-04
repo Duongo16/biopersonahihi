@@ -118,6 +118,9 @@ export default function BusinessDashboard() {
 
         const apiResponse = await fetch("/api/business/get-api-key", {
           credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
         const apiData = await apiResponse.json();
 
@@ -127,6 +130,9 @@ export default function BusinessDashboard() {
 
         const logsResponse = await fetch("/api/business/verification-log", {
           credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
         const logsData = await logsResponse.json();
 

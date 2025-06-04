@@ -1,14 +1,20 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import VerificationLog from "@/utils/models/VerificationLog";
 import { getBusinessUsers } from "@/app/lib/business";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const token = (await cookieStore).get("token")?.value;
+    const authHeader = req.headers.get("authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return {
+        error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
+      };
+    }
+
+    const token = authHeader.split(" ")[1];
 
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

@@ -5,7 +5,15 @@ import jwt from "jsonwebtoken";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("token")?.value;
+    const authHeader = req.headers.get("authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return {
+        error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
+      };
+    }
+
+    const token = authHeader.split(" ")[1];
 
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
