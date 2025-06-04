@@ -51,6 +51,9 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
           method: "POST",
           credentials: "include",
           body: formData,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 

@@ -57,6 +57,9 @@ export default function FaceStep({
           method: "POST",
           body: formData,
           credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
