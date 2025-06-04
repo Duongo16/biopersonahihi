@@ -179,6 +179,9 @@ export default function VerifyUserPage() {
         {
           method: "POST",
           body: faceForm,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -205,6 +208,9 @@ export default function VerifyUserPage() {
         {
           method: "POST",
           body: voiceForm,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -228,6 +234,7 @@ export default function VerifyUserPage() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
             body: JSON.stringify({
               userId,
