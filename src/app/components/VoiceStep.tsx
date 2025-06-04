@@ -71,6 +71,9 @@ export default function VoiceStep({
         {
           method: "POST",
           body: formData,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
