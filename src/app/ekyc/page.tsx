@@ -46,6 +46,9 @@ export default function EkycFlowPage() {
           {
             method: "GET",
             credentials: "include",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
         );
 
