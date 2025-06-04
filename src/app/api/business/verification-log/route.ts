@@ -9,9 +9,7 @@ export async function GET(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return {
-        error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
-      };
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
@@ -28,10 +26,11 @@ export async function GET(req: NextRequest) {
     interface BusinessUser {
       _id: string;
     }
-    const users = await getBusinessUsers(decoded.id);
-    const userIds = users.map((user: BusinessUser) => user._id);
 
     await connectDB();
+
+    const users = await getBusinessUsers(decoded.id);
+    const userIds = users.map((user: BusinessUser) => user._id);
 
     const logs = await VerificationLog.find({ userId: { $in: userIds } })
       .sort({ timestamp: -1 })

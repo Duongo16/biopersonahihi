@@ -8,9 +8,7 @@ export async function GET(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return {
-        error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
-      };
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
