@@ -104,6 +104,9 @@ export default function BusinessDashboard() {
       try {
         const userResponse = await fetch("/api/business/users", {
           credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
         const userData = await userResponse.json();
 

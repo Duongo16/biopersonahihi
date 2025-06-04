@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 export function verifyTokenWithRole(req: NextRequest, allowedRoles: string[]) {
-  const token = req.cookies.get("token")?.value;
+  const authHeader = req.headers.get("authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return {
+      error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  const token = authHeader.split(" ")[1];
+  console.log("token hihi: " + token);
 
   if (!token) {
     return {
