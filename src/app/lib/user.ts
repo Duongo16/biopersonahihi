@@ -12,7 +12,7 @@ export interface CCCDInfo {
 export async function getCCCDInfo(): Promise<CCCDInfo | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_EKYC_API}ekyc/cccd-info`,
+      `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/cccd-info`,
       {
         method: "GET",
         credentials: "include",
