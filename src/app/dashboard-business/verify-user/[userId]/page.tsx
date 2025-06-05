@@ -150,9 +150,12 @@ export default function VerifyUserPage() {
       recorder.start();
       setAudioRecording(true);
 
+      // Delay 5s rồi mới stop — đợi đảm bảo đủ thời lượng ghi
       setTimeout(() => {
         recorder.stop();
         setAudioRecording(false);
+        // 💡 Dừng tất cả track để giải phóng microphone
+        stream.getTracks().forEach((track) => track.stop());
       }, 5000);
     } catch {
       toast.error("Không thể truy cập microphone");
@@ -202,15 +205,13 @@ export default function VerifyUserPage() {
       const voiceForm = new FormData();
       voiceForm.append("user_id", userId as string);
       voiceForm.append("file", audioFile);
+      console.log(...voiceForm.entries());
 
       const voiceRes = await fetch(
         `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/voice-verify`,
         {
           method: "POST",
           body: voiceForm,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
