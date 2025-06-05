@@ -2,13 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-export async function PATCH(req: NextRequest, context: Context) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function PATCH(req: NextRequest, context: any) {
   try {
     await connectDB();
 
@@ -16,6 +11,7 @@ export async function PATCH(req: NextRequest, context: Context) {
     const { apiKey } = await req.json();
 
     const updated = await User.findByIdAndUpdate(id, { apiKey }, { new: true });
+
     if (!updated) {
       return NextResponse.json(
         { message: "Business not found" },

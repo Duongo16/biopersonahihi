@@ -3,13 +3,8 @@ import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 import bcrypt from "bcryptjs";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-export async function PUT(req: Request, context: Context) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function PUT(req: Request, context: any) {
   try {
     await connectDB();
 

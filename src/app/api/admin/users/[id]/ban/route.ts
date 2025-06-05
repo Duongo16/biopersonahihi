@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-export async function PATCH(req: Request, context: Context) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function PATCH(req: Request, context: any) {
   await connectDB();
 
   const user = await User.findById(context.params.id);
