@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 
-export async function PATCH(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+interface Context {
+  params: {
+    id: string;
+  };
+}
+
+export async function PATCH(req: NextRequest, context: Context) {
   try {
     await connectDB();
 

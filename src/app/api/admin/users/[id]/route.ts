@@ -3,7 +3,13 @@ import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 import bcrypt from "bcryptjs";
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+interface Context {
+  params: {
+    id: string;
+  };
+}
+
+export async function PUT(req: Request, context: Context) {
   try {
     await connectDB();
 
