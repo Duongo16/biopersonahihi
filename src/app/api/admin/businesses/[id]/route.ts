@@ -4,11 +4,12 @@ import User from "@/utils/models/User";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = context.params;
     const { apiKey } = await req.json();
 
     const updated = await User.findByIdAndUpdate(id, { apiKey }, { new: true });
@@ -21,7 +22,7 @@ export async function PATCH(
 
     return NextResponse.json({ message: "API key updated", business: updated });
   } catch (err) {
-    console.error(err);
+    console.error("PATCH /api/admin/businesses/[id] error:", err);
     return NextResponse.json(
       { message: "Failed to update business" },
       { status: 500 }
