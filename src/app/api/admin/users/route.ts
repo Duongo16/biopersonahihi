@@ -2,17 +2,51 @@ import { NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 import bcrypt from "bcryptjs";
+import UserCCCD from "@/utils/models/UserCCCD";
 
 export async function GET() {
   try {
     await connectDB();
-    const users = await User.find(
-      {},
-      "_id username email verified isBanned createdAt updatedAt"
-    ).where("role", "user");
-    return NextResponse.json({ users });
+
+    interface IUser {
+      _id: string;
+      username: string;
+      email: string;
+      isBanned: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    }
+
+    interface IUserCCCD {
+      userId: string;
+      verified: boolean;
+    }
+
+    // Gắn kiểu cho users
+    const users: IUser[] = await User.find(
+      { role: "user" },
+      "_id username email isBanned createdAt updatedAt"
+    ).lean<IUser[]>();
+
+    const userIds = users.map((u) => u._id.toString());
+
+    const userCCCDs: IUserCCCD[] = await UserCCCD.find(
+      { userId: { $in: userIds } },
+      "userId verified"
+    ).lean<IUserCCCD[]>();
+
+    const verifiedMap = new Map(
+      userCCCDs.map((u) => [u.userId.toString(), u.verified])
+    );
+
+    const usersWithVerified = users.map((user) => ({
+      ...user,
+      verified: verifiedMap.get(user._id.toString()) ?? false,
+    }));
+
+    return NextResponse.json({ users: usersWithVerified });
   } catch (err) {
-    console.error(err);
+    console.error("GET /api/admin/users error:", err);
     return NextResponse.json(
       { message: "Failed to fetch users" },
       { status: 500 }
@@ -33,7 +67,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Kiểm tra email đã tồn tại chưa
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -41,9 +74,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
     const passwordHashed = await bcrypt.hash(password, 10);
 
-    // Tạo người dùng mới
     const newUser = await User.create({
       username,
       email,

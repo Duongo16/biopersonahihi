@@ -122,6 +122,7 @@ export default function AdminDashboard() {
         const userRes = await fetch("/api/admin/users");
         const userData = await userRes.json();
         if (Array.isArray(userData.users)) {
+          console.log(userData.users);
           setUsers(userData.users);
         } else {
           toast.error("Dữ liệu người dùng không hợp lệ");
@@ -147,7 +148,7 @@ export default function AdminDashboard() {
   const updateApiKey = async (businessId: string) => {
     try {
       const res = await fetch(`/api/admin/businesses/${businessId}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey: newApiKey }),
       });
@@ -334,6 +335,27 @@ export default function AdminDashboard() {
                   }
                 />
               </div>
+              {newUser.role === "user" && (
+                <div className="space-y-2">
+                  <Label htmlFor="businessId">Chọn Business</Label>
+                  <select
+                    id="businessId"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={newUser.businessId || ""}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, businessId: e.target.value })
+                    }
+                  >
+                    <option value="">-- Chọn business --</option>
+                    {businesses.map((b) => (
+                      <option key={b._id} value={b._id}>
+                        {b.username}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="role">Vai trò</Label>
                 <select
@@ -353,6 +375,20 @@ export default function AdminDashboard() {
             <DialogFooter>
               <Button
                 onClick={async () => {
+                  if (
+                    !newUser.username ||
+                    !newUser.email ||
+                    !newUser.password ||
+                    !newUser.role
+                  ) {
+                    toast.error("❌ Vui lòng nhập đầy đủ thông tin bắt buộc");
+                    return;
+                  }
+
+                  if (newUser.role === "user" && !newUser.businessId) {
+                    toast.error("❌ Vui lòng chọn Business cho user");
+                    return;
+                  }
                   try {
                     const res = await fetch(
                       `/api/admin/${newUser.role === "user" ? "users" : "businesses"}`,
@@ -365,7 +401,11 @@ export default function AdminDashboard() {
                     if (res.ok) {
                       const created = await res.json();
                       if (newUser.role === "user") {
-                        setUsers((prev) => [...prev, created.user]);
+                        const usersRes = await fetch("/api/admin/users");
+                        if (usersRes.ok) {
+                          const data = await usersRes.json();
+                          setUsers(data.users);
+                        }
                       } else {
                         setBusinesses((prev) => [...prev, created.user]);
                       }
@@ -681,11 +721,11 @@ export default function AdminDashboard() {
                   );
                   if (res.ok) {
                     const updated = await res.json();
-                    setUsers((prev) =>
-                      prev.map((u) =>
-                        u._id === banTarget._id ? updated.user : u
-                      )
-                    );
+                    const usersRes = await fetch("/api/admin/users");
+                    if (usersRes.ok) {
+                      const data = await usersRes.json();
+                      setUsers(data.users);
+                    }
                     toast.success(
                       updated.user.isBanned
                         ? "✅ Tài khoản đã bị ban"
