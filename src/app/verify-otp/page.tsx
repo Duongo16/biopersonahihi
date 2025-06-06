@@ -17,7 +17,7 @@ export default function VerifyOtpPage() {
 
     if (pendingUser) setMode("user");
     else if (pendingBusiness) setMode("business");
-    else toast.error("Không tìm thấy thông tin đăng ký.");
+    else toast.error("Registration information not found.");
   }, []);
 
   const handleVerify = async () => {
@@ -27,7 +27,7 @@ export default function VerifyOtpPage() {
         : localStorage.getItem("pendingBusiness");
 
     if (!localData) {
-      toast.error("Không tìm thấy thông tin để xác minh.");
+      toast.error("No information found to verify.");
       return;
     }
 
@@ -46,7 +46,7 @@ export default function VerifyOtpPage() {
 
     if (!verifyRes.ok) {
       const data = await verifyRes.json();
-      toast.error(data.message || "OTP sai hoặc đã hết hạn.");
+      toast.error(data.message || "OTP is incorrect or expired.");
       return;
     }
 
@@ -69,10 +69,10 @@ export default function VerifyOtpPage() {
       localStorage.removeItem(
         mode === "user" ? "pendingUser" : "pendingBusiness"
       );
-      toast.success("Đăng ký thành công! 🎉");
+      toast.success("Registration successful! 🎉");
       router.push("/login");
     } else {
-      toast.error(resData.message || "Đăng ký thất bại.");
+      toast.error(resData.message || "Registration failed.");
     }
   };
 
@@ -80,7 +80,7 @@ export default function VerifyOtpPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-6 bg-white p-6 shadow-md rounded-md">
         <h2 className="text-2xl font-bold text-center text-main">
-          Nhập mã OTP đã được gửi đến email
+          Enter the OTP code sent to your email
         </h2>
         <Input
           type="text"
@@ -89,7 +89,7 @@ export default function VerifyOtpPage() {
           onChange={(e) => setOtp(e.target.value)}
         />
         <Button className="w-full" onClick={handleVerify}>
-          Xác minh và đăng ký
+          Verify and register
         </Button>
       </div>
     </div>

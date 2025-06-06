@@ -16,7 +16,7 @@ export default function EkycFlowPage() {
 
   const [userId, setUserId] = useState<string>("");
 
-  const steps = ["Đăng ký CCCD", "Chụp khuôn mặt", "Thu giọng nói"];
+  const steps = ["Register ID Card", "Capture Face", "Record Voice"];
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -31,11 +31,11 @@ export default function EkycFlowPage() {
           setUserId(data.user.id);
         } else {
           console.log(res);
-          toast.error("Không thể xác thực người dùng");
+          toast.error("Unable to authenticate user");
         }
       } catch (err) {
-        console.error("Lỗi xác thực:", err);
-        toast.error("Không thể lấy thông tin người dùng");
+        console.error("Authentication error:", err);
+        toast.error("Unable to fetch user information");
       }
     };
 
@@ -68,7 +68,7 @@ export default function EkycFlowPage() {
           } else setStep(2);
         }
       } catch (error) {
-        console.error("❌ Lỗi kiểm tra CCCD:", error);
+        console.error("❌ Error checking ID Card:", error);
       } finally {
         setIsLoading(false);
       }
@@ -88,7 +88,7 @@ export default function EkycFlowPage() {
     if (target === 1 || (target > 1 && hasCCCD)) {
       setStep(target);
     } else {
-      toast.error("Vui lòng hoàn thành bước đăng ký CCCD trước.");
+      toast.error("Please complete the ID Card registration step first.");
     }
   };
 
@@ -96,7 +96,7 @@ export default function EkycFlowPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center text-main text-lg font-semibold animate-pulse">
-          Đang tải thông tin người dùng...
+          Loading user information...
         </div>
       </div>
     );
@@ -107,7 +107,7 @@ export default function EkycFlowPage() {
       <div className="w-full max-w-md space-y-8 mb-25">
         {/* Progress Indicator */}
         <h1 className="text-3xl font-bold text-center text-main mb-10">
-          ĐĂNG KÝ eKYC
+          eKYC REGISTRATION
         </h1>
         <div className="w-full flex justify-between items-center">
           {steps.map((label, index) => {

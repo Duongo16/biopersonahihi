@@ -32,14 +32,14 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Vui lòng nhập đầy đủ email và mật khẩu.", {
+      toast.error("Please enter full email and password.", {
         icon: "⚠️",
       });
       return;
     }
 
     try {
-      toast.loading("Đang đăng nhập...", { id: "login" });
+      toast.loading("Logging in...", { id: "login" });
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_AUTH_API}/auth/login`,
@@ -58,7 +58,7 @@ export default function LoginPage() {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         toast.dismiss("login");
-        toast.success(data.message || "Đăng nhập thành công! 🎉");
+        toast.success(data.message || "Login successful! 🎉");
 
         // Lấy thông tin người dùng
         const userResponse = await fetch(
@@ -77,12 +77,12 @@ export default function LoginPage() {
         router.push("/");
       } else {
         toast.dismiss("login");
-        toast.error(data.detail || "Đăng nhập thất bại.");
+        toast.error(data.detail || "Login failed.");
       }
     } catch (error) {
       console.error("❌ Error during login:", error);
       toast.dismiss("login");
-      toast.error("Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.");
+      toast.error("An error occurred while logging in. Please try again.");
     }
   };
 

@@ -35,7 +35,7 @@ export default function RegisterPage() {
         setBusinesses(data.businesses);
       } catch (error) {
         console.error("Error fetching businesses:", error);
-        toast.error("Đã xảy ra lỗi khi tải danh sách business.");
+        toast.error("An error occurred while loading the business list.");
       }
     };
 
@@ -46,17 +46,17 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (!username || !email || !password || !confirmPassword || !businessId) {
-      toast.error("Vui lòng điền đầy đủ thông tin.", { icon: "⚠️" });
+      toast.error("Please fill in all information.", { icon: "⚠️" });
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Mật khẩu nhập lại không khớp.");
+      toast.error("Re-entered password does not match.");
       return;
     }
 
     try {
-      toast.loading("Đang gửi mã xác minh...", { id: "send-otp" });
+      toast.loading("Sending verification code...", { id: "send-otp" });
 
       const otpRes = await fetch(
         `${process.env.NEXT_PUBLIC_AUTH_API}/auth/send-otp`,
@@ -74,7 +74,7 @@ export default function RegisterPage() {
 
       if (!otpRes.ok) {
         const data = await otpRes.json();
-        toast.error(data.message || "Gửi OTP thất bại.");
+        toast.error(data.message || "OTP sending failed.");
         return;
       }
 
@@ -88,7 +88,7 @@ export default function RegisterPage() {
     } catch (error) {
       console.error("❌ Error sending OTP:", error);
       toast.dismiss("send-otp");
-      toast.error("Đã xảy ra lỗi khi gửi OTP. Vui lòng thử lại.");
+      toast.error("An error occurred while sending OTP. Please try again.");
     }
   };
 

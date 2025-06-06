@@ -96,10 +96,10 @@ export default function ProfilePage() {
             confirmPassword: "",
           });
         } else {
-          toast.error("Không thể lấy thông tin người dùng");
+          toast.error("Unable to get user information");
         }
       } catch {
-        toast.error("Lỗi kết nối server");
+        toast.error("Server connection error");
       } finally {
         setLoading(false);
       }
@@ -121,7 +121,7 @@ export default function ProfilePage() {
       );
       const data = await res.json();
       if (res.ok) {
-        toast.success("✅ Cập nhật thông tin thành công!");
+        toast.success("✅ Information updated successfully!");
         if (user) {
           setUser({
             ...user,
@@ -130,10 +130,10 @@ export default function ProfilePage() {
         }
         setIsEditing(false);
       } else {
-        toast.error(data.detail || "❌ Lỗi cập nhật hihi");
+        toast.error(data.detail || "❌ Update error hihi");
       }
     } catch {
-      toast.error("Không thể kết nối server");
+      toast.error("Unable to connect to server");
     } finally {
       setIsUpdating(false);
     }
@@ -141,11 +141,11 @@ export default function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp");
+      toast.error("Confirmation password does not match");
       return;
     }
     if (formData.newPassword.length < 6) {
-      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự");
+      toast.error("New password must be at least 6 characters");
       return;
     }
     setIsUpdating(true);
@@ -164,7 +164,7 @@ export default function ProfilePage() {
       );
       const data = await res.json();
       if (res.ok) {
-        toast.success("✅ Đổi mật khẩu thành công!");
+        toast.success("✅ Password changed successfully!");
         setFormData({
           ...formData,
           currentPassword: "",
@@ -172,10 +172,10 @@ export default function ProfilePage() {
           confirmPassword: "",
         });
       } else {
-        toast.error(data.message || "❌ Lỗi đổi mật khẩu");
+        toast.error(data.message || "❌ Password change error");
       }
     } catch {
-      toast.error("Không thể kết nối server");
+      toast.error("Unable to connect to server");
     } finally {
       setIsUpdating(false);
     }
@@ -185,7 +185,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center text-main text-lg font-semibold animate-pulse">
-          Đang tải thông tin người dùng...
+          Loading user information...
         </div>
       </div>
     );
@@ -195,7 +195,7 @@ export default function ProfilePage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg text-red-500">
-          ❌ Không thể tải thông tin người dùng
+          ❌ Unable to load user information
         </div>
       </div>
     );
@@ -205,11 +205,9 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-main">
-          Thông tin cá nhân
+          Personal information
         </h2>
-        <p className="text-muted-foreground">
-          Quản lý thông tin tài khoản của bạn
-        </p>
+        <p className="text-muted-foreground">Manage your account information</p>
       </div>
 
       {/* Profile Header */}
@@ -252,12 +250,12 @@ export default function ProfilePage() {
       {/* Profile Information */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-main">Thông tin chi tiết</CardTitle>
+          <CardTitle className="text-main">Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Tên người dùng</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 value={formData.username}
@@ -272,7 +270,7 @@ export default function ProfilePage() {
               <Input id="email" value={formData.email} disabled />
             </div>
             <div className="space-y-2">
-              <Label>Ngày tạo tài khoản</Label>
+              <Label>Created At</Label>
               <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">
@@ -281,7 +279,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Cập nhật lần cuối</Label>
+              <Label>Updated At</Label>
               <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">
@@ -302,7 +300,7 @@ export default function ProfilePage() {
                 {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
               </Button>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
-                Hủy
+                Cancel
               </Button>
             </div>
           ) : (
@@ -321,7 +319,7 @@ export default function ProfilePage() {
       {/* Account Statistics */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-main">Thống kê tài khoản</CardTitle>
+          <CardTitle className="text-main">Account statistics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -332,7 +330,7 @@ export default function ProfilePage() {
                 <UserRoundX className="h-8 w-8 text-red-600" />
               )}
               <div>
-                <p className="font-medium">Trạng thái eKYC</p>
+                <p className="font-medium">eKYC Status</p>
                 <p className="text-sm text-muted-foreground">
                   {user.verified ? "Đã đăng ký eKYC" : "Chưa đăng ký eKYC"}
                 </p>
@@ -341,14 +339,14 @@ export default function ProfilePage() {
             <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
               <Shield className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="font-medium">Bảo mật</p>
-                <p className="text-sm text-muted-foreground">Mật khẩu mạnh</p>
+                <p className="font-medium">Security</p>
+                <p className="text-sm text-muted-foreground">Strong password</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
               <Calendar className="h-8 w-8 text-purple-600" />
               <div>
-                <p className="font-medium">Thành viên từ</p>
+                <p className="font-medium">Member from</p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(user.createdAt).getFullYear()}
                 </p>
@@ -363,9 +361,11 @@ export default function ProfilePage() {
   const renderSecurity = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-main">Bảo mật</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-main">
+          Security
+        </h2>
         <p className="text-muted-foreground">
-          Quản lý mật khẩu và cài đặt bảo mật
+          Manage passwords and security settings
         </p>
       </div>
 
@@ -374,12 +374,12 @@ export default function ProfilePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-main">
             <Lock className="h-5 w-5 " />
-            Đổi mật khẩu
+            Change password
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password">Mật khẩu hiện tại</Label>
+            <Label htmlFor="current-password">Current Password</Label>
             <Input
               id="current-password"
               type="password"
@@ -391,7 +391,7 @@ export default function ProfilePage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="new-password">Mật khẩu mới</Label>
+            <Label htmlFor="new-password">New Password</Label>
             <Input
               id="new-password"
               type="password"
@@ -399,11 +399,11 @@ export default function ProfilePage() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData({ ...formData, newPassword: e.target.value })
               }
-              placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+              placeholder="Enter new password (at least 6 characters)"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Xác nhận mật khẩu mới</Label>
+            <Label htmlFor="confirm-password">Confirm new password</Label>
             <Input
               id="confirm-password"
               type="password"
@@ -411,7 +411,7 @@ export default function ProfilePage() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData({ ...formData, confirmPassword: e.target.value })
               }
-              placeholder="Nhập lại mật khẩu mới"
+              placeholder="Re-enter new password"
             />
           </div>
           <Button
@@ -420,7 +420,7 @@ export default function ProfilePage() {
             className="flex items-center gap-2"
           >
             <Key className="h-4 w-4" />
-            {isUpdating ? "Đang cập nhật..." : "Đổi mật khẩu"}
+            {isUpdating ? "Updating..." : "Change password"}
           </Button>
         </CardContent>
       </Card>
@@ -430,37 +430,37 @@ export default function ProfilePage() {
   const renderSettings = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-main">Cài đặt</h2>
-        <p className="text-muted-foreground">Tùy chỉnh trải nghiệm sử dụng</p>
+        <h2 className="text-3xl font-bold tracking-tight text-main">Setting</h2>
+        <p className="text-muted-foreground">Customize your user experience</p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle className="text-red-600">Vùng nguy hiểm</CardTitle>
+          <CardTitle className="text-red-600">Danger zone</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="p-4 border ed-200 rounded-lg bg-red-50">
-            <p className="font-medium text-red-800 mb-2">Xóa tài khoản</p>
+            <p className="font-medium text-red-800 mb-2">Delete account</p>
             <p className="text-sm text-red-600 mb-4">
-              Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa
-              vĩnh viễn.
+              This action cannot be undone. All your data will be permanently
+              deleted.
             </p>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="destructive" size="sm">
-                  Xóa tài khoản
+                  Delete account
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Xác nhận xóa tài khoản</DialogTitle>
+                  <DialogTitle>Confirm account deletion</DialogTitle>
                 </DialogHeader>
                 <p className="text-sm text-muted-foreground">
-                  Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể
-                  hoàn tác.
+                  Are you sure you want to delete your account? This action
+                  cannot be undone.
                 </p>
                 <DialogFooter>
-                  <Button variant="outline">Hủy</Button>
-                  <Button variant="destructive">Xóa tài khoản</Button>
+                  <Button variant="outline">Cancel</Button>
+                  <Button variant="destructive">Delete account</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -508,7 +508,7 @@ export default function ProfilePage() {
         </div>
         <div className="p-2 md:mt-0 mt-10">
           <SidebarGroup>
-            <SidebarGroupLabel>Cài đặt tài khoản</SidebarGroupLabel>
+            <SidebarGroupLabel>Account settings</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {sidebarItems.map((item) => (

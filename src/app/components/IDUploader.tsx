@@ -20,7 +20,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
   ) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file && !["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      toast.error("Chỉ chấp nhận file PNG hoặc JPG.");
+      toast.error("Only PNG or JPG files are accepted.");
       return;
     }
     if (type === "front") {
@@ -35,7 +35,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
 
   const handleSubmit = async () => {
     if (!idFront || !idBack) {
-      toast.error("Vui lòng chọn cả ảnh mặt trước và mặt sau của CCCD.");
+      toast.error("Please select both front and back images of your ID card.");
       return;
     }
 
@@ -60,18 +60,16 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
       const data = await response.json();
       if (response.ok) {
         toast.success(
-          `Xác thực thành công! ID: ${data.extractedID}, Tên: ${data.extractedName}, Ngày sinh: ${data.extractedDOB}`
+          `Verification successful! ID: ${data.extractedID}, Name: ${data.extractedName}, Date of Birth: ${data.extractedDOB}`
         );
         onSuccess();
       } else {
         console.error("Validation failed:", data);
-        toast.error(
-          data.message || "Xác thực không thành công. Vui lòng thử lại."
-        );
+        toast.error(data.message || "Verification failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error validating CCCD:", error);
-      toast.error("Failed to validate CCCD. Please try again.");
+      console.error("Error validating ID card:", error);
+      toast.error("Failed to validate ID card. Please try again.");
     }
   };
 
@@ -79,7 +77,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="idFront">Ảnh mặt trước CCCD</Label>
+          <Label htmlFor="idFront">Front side of ID card</Label>
           <Input
             id="idFront"
             type="file"
@@ -91,14 +89,14 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
               src={idFrontPreview}
               width={300}
               height={200}
-              alt="Ảnh CCCD mặt trước"
+              alt="Front side of ID card"
               className="mt-2 rounded border w-full object-contain max-h-64"
             />
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="idBack">Ảnh mặt sau CCCD</Label>
+          <Label htmlFor="idBack">Back side of ID card</Label>
           <Input
             id="idBack"
             type="file"
@@ -110,7 +108,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
               src={idBackPreview}
               width={300}
               height={200}
-              alt="Ảnh CCCD mặt sau"
+              alt="Back side of ID card"
               className="mt-2 rounded border w-full object-contain max-h-64"
             />
           )}
@@ -122,7 +120,7 @@ export default function IDUploader({ onSuccess }: { onSuccess: () => void }) {
         disabled={loading}
         className="w-full bg-main hover:bg-blue-700 text-white"
       >
-        {loading ? "Đang xác thực..." : "Xác thực CCCD"}
+        {loading ? "Verifying..." : "Verify ID card"}
       </Button>
     </div>
   );

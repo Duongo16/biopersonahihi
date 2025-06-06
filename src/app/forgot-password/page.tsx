@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      toast.error("Vui lòng nhập email");
+      toast.error("Please enter your email");
       return;
     }
 
@@ -29,13 +29,13 @@ export default function ForgotPasswordPage() {
 
       const data = await res.json();
       if (res.ok) {
-        toast.success(data.message || "Đã gửi email đặt lại mật khẩu");
+        toast.success(data.message || "Password reset email sent");
         setEmail("");
       } else {
-        toast.error(data.message || "Không thể xử lý yêu cầu");
+        toast.error(data.message || "Unable to process request");
       }
     } catch {
-      toast.error("Lỗi hệ thống");
+      toast.error("System error");
     } finally {
       setLoading(false);
     }
@@ -43,13 +43,13 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="p-6 max-w-md mx-auto space-y-4">
-      <h1 className="text-2xl font-bold text-center">📧 Quên mật khẩu</h1>
+      <h1 className="text-2xl font-bold text-center">📧 Forgot Password</h1>
       <p className="text-sm text-gray-600 text-center">
-        Nhập email để nhận liên kết đặt lại mật khẩu
+        Enter your email to receive a password reset link
       </p>
       <Input
         type="email"
-        placeholder="Địa chỉ email"
+        placeholder="Email address"
         value={email}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setEmail(e.target.value)
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
         disabled={loading}
         className="w-full"
       >
-        {loading ? "Đang gửi..." : "📨 Gửi email khôi phục"}
+        {loading ? "Sending..." : "📨 Send recovery email"}
       </Button>
     </div>
   );

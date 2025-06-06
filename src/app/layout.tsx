@@ -74,7 +74,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || "Đăng xuất thành công! 👋");
+        toast.success(data.message || "Log out successfully! 👋");
         useAuthStore.getState().logout();
         router.push("/login");
       }
@@ -170,7 +170,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                           className="block px-4 py-2 hover:bg-gray-100"
                           onClick={() => setDropdownOpen(false)}
                         >
-                          Xác thực người dùng
+                          User authentication
                         </Link>
                       ) : user.role === "user" ? (
                         <Link
@@ -178,7 +178,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                           className="block px-4 py-2 hover:bg-gray-100"
                           onClick={() => setDropdownOpen(false)}
                         >
-                          Đăng ký eKYC
+                          Register eKYC
                         </Link>
                       ) : null}
 
@@ -189,7 +189,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         }}
                         className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                       >
-                        Đăng xuất
+                        Log out
                       </button>
                     </div>
                   )}
@@ -248,15 +248,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </svg>
                   <p className="text-sm">
                     {ekycDone ? (
-                      <>Bạn đã hoàn thành đăng ký eKYC.</>
+                      <>You have completed eKYC registration.</>
                     ) : (
                       <>
-                        Bạn chưa hoàn thành đăng ký eKYC.{" "}
+                        You have not completed eKYC registration.{" "}
                         <Link
                           href="/ekyc"
                           className="underline text-main font-medium"
                         >
-                          Đăng ký ngay
+                          Sign up now
                         </Link>
                       </>
                     )}
@@ -265,7 +265,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <button
                   onClick={() => setEkycDone(null)}
                   className="text-gray-500 hover:text-gray-700 transition"
-                  aria-label="Đóng thông báo"
+                  aria-label="Close notification"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

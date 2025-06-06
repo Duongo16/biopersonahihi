@@ -39,7 +39,7 @@ export default function FaceStep({
         : null);
 
     if (!imageFile) {
-      toast.error("Vui lòng chọn hoặc chụp ảnh khuôn mặt.");
+      toast.error("Please select or capture a face image.");
       return;
     }
     setLoading(true);
@@ -67,23 +67,23 @@ export default function FaceStep({
 
       if (response.ok) {
         toast.success(
-          `Khuôn mặt đã được xác minh (độ tương đồng: ${data.similarity}).`
+          `Face has been verified (similarity: ${data.similarity}).`
         );
         onSuccess();
       } else {
-        toast.error(data.detail || "Xác minh khuôn mặt thất bại.");
+        toast.error(data.detail || "Face verification failed.");
       }
     } catch (error) {
       console.error("Error verifying face:", error);
-      toast.error("Đã xảy ra lỗi khi xác minh khuôn mặt.");
+      toast.error("An error occurred during face verification.");
     }
   };
   if (hasFace) {
     return (
       <div className="text-center bg-green-100 border border-green-500 text-green-700 p-4 rounded-lg">
-        <h2 className="text-xl font-semibold mb-2">Khuôn mặt đã đăng ký</h2>
+        <h2 className="text-xl font-semibold mb-2">Face already registered</h2>
         <p>
-          Bạn đã đăng ký khuôn mặt thành công. Không thể thêm khuôn mặt mới.
+          You have successfully registered your face. You cannot add a new face.
         </p>
       </div>
     );
@@ -92,7 +92,7 @@ export default function FaceStep({
   return (
     <div>
       <h2 className="text-2xl font-bold text-center mb-6">
-        Bước 2: Chụp ảnh khuôn mặt
+        Step 2: Capture face image
       </h2>
       {!uploadedImage && (
         <div className="mb-4">
@@ -118,7 +118,7 @@ export default function FaceStep({
               onClick={captureImage}
               className="w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 mb-2"
             >
-              Chụp ảnh
+              Capture image
             </button>
           )}
           {capturedImage && (
@@ -126,7 +126,7 @@ export default function FaceStep({
               onClick={() => setCapturedImage(null)}
               className="w-full bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 mb-2"
             >
-              Chụp lại
+              Retake
             </button>
           )}
         </div>
@@ -146,7 +146,7 @@ export default function FaceStep({
         disabled={loading}
         className="w-full bg-main text-white p-2 rounded-lg hover:bg-blue-700"
       >
-        {loading ? "Đang xác minh..." : "Xác minh khuôn mặt"}
+        {loading ? "Verifying..." : "Verify face"}
       </button>
     </div>
   );

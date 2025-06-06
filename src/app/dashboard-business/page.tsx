@@ -141,7 +141,7 @@ export default function BusinessDashboard() {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error("Đã xảy ra lỗi khi tải dữ liệu");
+        toast.error("An error occurred while loading data");
       } finally {
         setLoading(false);
       }
@@ -161,13 +161,13 @@ export default function BusinessDashboard() {
 
       if (response.ok) {
         setApiKey(data.apiKey);
-        toast.success("API key đã được cập nhật thành công");
+        toast.success("API key updated successfully");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.error("Error updating API key:", error);
-      toast.error("Đã xảy ra lỗi khi cập nhật API key");
+      toast.error("An error occurred while updating API key");
     } finally {
       setIsUpdatingApiKey(false);
     }
@@ -176,7 +176,7 @@ export default function BusinessDashboard() {
   const copyApiKey = () => {
     if (apiKey) {
       navigator.clipboard.writeText(apiKey);
-      toast.success("API key đã được sao chép");
+      toast.success("API key copied");
     }
   };
 
@@ -212,13 +212,13 @@ export default function BusinessDashboard() {
           Business Dashboard
         </h2>
         <p className="text-muted-foreground">
-          Tổng quan hệ thống quản lý doanh nghiệp
+          Overview of the business management system
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -226,14 +226,14 @@ export default function BusinessDashboard() {
               {stats.totalUsers}
             </div>
             <p className="text-xs text-muted-foreground">
-              Tổng số người dùng trong hệ thống
+              Total users in the system
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Users mới (7 ngày)
+              New Users (7 days)
             </CardTitle>
             <UserPlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -242,7 +242,7 @@ export default function BusinessDashboard() {
               {stats.recentUsers}
             </div>
             <p className="text-xs text-muted-foreground">
-              Người dùng đăng ký trong 7 ngày qua
+              Users registered in the last 7 days
             </p>
           </CardContent>
         </Card>
@@ -268,7 +268,7 @@ export default function BusinessDashboard() {
                   padding: 6,
                 }}
               >
-                {apiKey ? "Hoạt động" : "Chưa có"}
+                {apiKey ? "Active" : "Not available"}
               </Badge>
             </div>
           </CardContent>
@@ -276,7 +276,7 @@ export default function BusinessDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ngày tạo gần nhất
+              Most Recent Creation Date
             </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -291,7 +291,7 @@ export default function BusinessDashboard() {
                 : "N/A"}
             </div>
             <p className="text-xs text-muted-foreground">
-              User được tạo gần đây nhất
+              Most recently created user
             </p>
           </CardContent>
         </Card>
@@ -302,13 +302,13 @@ export default function BusinessDashboard() {
   const renderUsers = () => (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold tracking-tight text-main">
-        Quản lý Users
+        User Management
       </h2>
       <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Tìm kiếm users..."
+            placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
@@ -318,12 +318,12 @@ export default function BusinessDashboard() {
           <DropdownMenuTrigger asChild className="bg-main text-white">
             <Button variant="outline">
               <Filter className="mr-2 h-4 w-4" />
-              Trạng thái:{" "}
+              Status:{" "}
               {filterStatus !== undefined
                 ? !filterStatus
-                  ? "Hoạt động"
-                  : "Bị ban"
-                : "Tất cả"}
+                  ? "Active"
+                  : "Banned"
+                : "All"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white">
@@ -331,19 +331,19 @@ export default function BusinessDashboard() {
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus(undefined)}
             >
-              Tất cả
+              All
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus(false)}
             >
-              Hoạt động
+              Active
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus(true)}
             >
-              Bị ban
+              Banned
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -356,14 +356,14 @@ export default function BusinessDashboard() {
                 <tr>
                   <th className="h-12 px-4 text-left font-medium">Username</th>
                   <th className="h-12 px-4 text-left font-medium">Email</th>
-                  <th className="h-12 px-4 text-left font-medium">Ngày tạo</th>
                   <th className="h-12 px-4 text-left font-medium">
-                    Ngày cập nhật
+                    Created At
+                  </th>
+                  <th className="h-12 px-4 text-left font-medium">
+                    Updated At
                   </th>
                   <th className="h-12 px-4 text-left font-medium">ID</th>
-                  <th className="h-12 px-4 text-left font-medium">
-                    Trạng thái
-                  </th>
+                  <th className="h-12 px-4 text-left font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -398,7 +398,7 @@ export default function BusinessDashboard() {
                             justifyContent: "center",
                           }}
                         >
-                          {user.isBanned ? "Bị ban" : "Hoạt động"}
+                          {user.isBanned ? "Banned" : "Active"}
                         </Badge>
                       </td>
                     </tr>
@@ -409,9 +409,7 @@ export default function BusinessDashboard() {
                       colSpan={5}
                       className="p-8 text-center text-muted-foreground"
                     >
-                      {searchTerm
-                        ? "Không tìm thấy user nào"
-                        : "Chưa có user nào"}
+                      {searchTerm ? "No users found" : "No users yet"}
                     </td>
                   </tr>
                 )}
@@ -425,11 +423,11 @@ export default function BusinessDashboard() {
 
   const renderApiKey = () => (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight">Quản lý API Key</h2>
+      <h2 className="text-3xl font-bold tracking-tight">API Key Management</h2>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" /> API Key hiện tại
+            <Key className="h-5 w-5" /> Current API Key
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -440,7 +438,7 @@ export default function BusinessDashboard() {
                 <Input
                   id="api-key"
                   type={showApiKey ? "text" : "password"}
-                  value={apiKey || "Chưa có API Key"}
+                  value={apiKey || "No API Key"}
                   readOnly
                   className="font-mono text-sm"
                 />
@@ -470,9 +468,7 @@ export default function BusinessDashboard() {
           <div className="flex items-center justify-between  bg-muted rounded-lg">
             <div>
               <p className="text-sm text-muted-foreground">
-                {apiKey
-                  ? "API Key đang hoạt động và sẵn sàng sử dụng"
-                  : "Chưa có API Key"}
+                {apiKey ? "API Key is active and ready to use" : "No API Key"}
               </p>
             </div>
             <Badge
@@ -486,7 +482,7 @@ export default function BusinessDashboard() {
                 justifyContent: "center",
               }}
             >
-              {apiKey ? "Hoạt động" : "Chưa có"}
+              {apiKey ? "Active" : "Not available"}
             </Badge>
           </div>
           <div className="flex gap-2">
@@ -498,15 +494,15 @@ export default function BusinessDashboard() {
               <RefreshCw
                 className={`h-4 w-4 ${isUpdatingApiKey ? "animate-spin" : ""}`}
               />
-              {apiKey ? "Tạo API Key mới" : "Tạo API Key"}
+              {apiKey ? "Generate New API Key" : "Generate API Key"}
             </Button>
           </div>
           {apiKey && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                <strong>Lưu ý:</strong> Khi tạo API Key mới, API Key cũ sẽ không
-                còn hoạt động. Hãy đảm bảo cập nhật API Key mới trong ứng dụng
-                của bạn.
+                <strong>Note:</strong> When generating a new API Key, the old
+                API Key will no longer be valid. Please make sure to update your
+                application with the new API Key.
               </p>
             </div>
           )}
@@ -517,9 +513,9 @@ export default function BusinessDashboard() {
 
   const sidebarItems = [
     { title: "Dashboard", icon: BarChart3, id: "dashboard" },
-    { title: "Quản lý User", icon: Users, id: "users" },
+    { title: "User Management", icon: Users, id: "users" },
     {
-      title: "Nhật ký xác thực",
+      title: "Verification Logs",
       icon: FileText,
       id: "verification-logs",
     },
@@ -555,10 +551,10 @@ export default function BusinessDashboard() {
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
-            Nhật ký xác thực
+            Verification Logs
           </h2>
           <p className="text-muted-foreground">
-            Theo dõi các lần xác thực eKYC của người dùng
+            Track users&apos; eKYC verification attempts
           </p>
         </div>
 
@@ -567,21 +563,21 @@ export default function BusinessDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Tổng xác thực
+                Total Verifications
               </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{logStats.total}</div>
               <p className="text-xs text-muted-foreground">
-                Tổng số lần xác thực
+                Total verification attempts
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Thành công</CardTitle>
+              <CardTitle className="text-sm font-medium">Success</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
@@ -592,14 +588,14 @@ export default function BusinessDashboard() {
                 {logStats.total > 0
                   ? Math.round((logStats.success / logStats.total) * 100)
                   : 0}
-                % tỷ lệ thành công
+                % success rate
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Thất bại</CardTitle>
+              <CardTitle className="text-sm font-medium">Failed</CardTitle>
               <XCircle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
@@ -610,14 +606,14 @@ export default function BusinessDashboard() {
                 {logStats.total > 0
                   ? Math.round((logStats.failed / logStats.total) * 100)
                   : 0}
-                % tỷ lệ thất bại
+                % failure rate
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Hôm nay</CardTitle>
+              <CardTitle className="text-sm font-medium">Today</CardTitle>
               <Clock className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
@@ -625,7 +621,7 @@ export default function BusinessDashboard() {
                 {logStats.today}
               </div>
               <p className="text-xs text-muted-foreground">
-                Xác thực trong ngày
+                Verifications today
               </p>
             </CardContent>
           </Card>
@@ -636,7 +632,7 @@ export default function BusinessDashboard() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm kiếm theo User ID..."
+              placeholder="Search by User ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -647,12 +643,12 @@ export default function BusinessDashboard() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
                 <Filter className="mr-2 h-4 w-4" />
-                Trạng thái:{" "}
+                Status:{" "}
                 {filterStatusLog === "all"
-                  ? "Tất cả"
+                  ? "All"
                   : filterStatusLog === "success"
-                    ? "Thành công"
-                    : "Thất bại"}
+                    ? "Success"
+                    : "Failed"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white">
@@ -660,19 +656,19 @@ export default function BusinessDashboard() {
                 className="hover:bg-gray-200"
                 onClick={() => setFilterStatusLog("all")}
               >
-                Tất cả
+                All
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="hover:bg-gray-200"
                 onClick={() => setFilterStatusLog("success")}
               >
-                Thành công
+                Success
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="hover:bg-gray-200"
                 onClick={() => setFilterStatusLog("failed")}
               >
-                Thất bại
+                Failed
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -689,7 +685,7 @@ export default function BusinessDashboard() {
                       User ID
                     </th>
                     <th className="h-12 px-4 text-left align-middle font-medium">
-                      Trạng thái
+                      Status
                     </th>
                     <th className="h-12 px-4 text-left align-middle font-medium">
                       Liveness
@@ -701,7 +697,7 @@ export default function BusinessDashboard() {
                       Voice Match
                     </th>
                     <th className="h-12 px-4 text-left align-middle font-medium">
-                      Thời gian
+                      Time
                     </th>
                   </tr>
                 </thead>
@@ -714,7 +710,7 @@ export default function BusinessDashboard() {
                             <User className="h-4 w-4 text-muted-foreground" />
                             <div>
                               <div className="font-medium">
-                                {log.userId || "Ẩn danh"}
+                                {log.userId || "Anonymous"}
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {log._id}
@@ -738,7 +734,7 @@ export default function BusinessDashboard() {
                               padding: 6,
                             }}
                           >
-                            {log.stepPassed ? "Thành công" : "Thất bại"}
+                            {log.stepPassed ? "Success" : "Failed"}
                           </Badge>
                         </td>
                         <td className="p-4">
@@ -886,8 +882,8 @@ export default function BusinessDashboard() {
                         className="p-8 text-center text-muted-foreground"
                       >
                         {searchTerm || filterStatusLog !== "all"
-                          ? "Không tìm thấy log nào"
-                          : "Chưa có log xác thực nào"}
+                          ? "No logs found"
+                          : "No verification logs yet"}
                       </td>
                     </tr>
                   )}
@@ -919,7 +915,7 @@ export default function BusinessDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center text-main text-lg font-semibold animate-pulse">
-          Đang tải thông tin người dùng...
+          Loading user information...
         </div>
       </div>
     );
@@ -950,7 +946,7 @@ export default function BusinessDashboard() {
         </div>
         <div className="p-2">
           <SidebarGroup>
-            <SidebarGroupLabel>Quản lý</SidebarGroupLabel>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {sidebarItems.map((item) => (

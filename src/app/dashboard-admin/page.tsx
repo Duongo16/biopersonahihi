@@ -76,12 +76,12 @@ const sidebarItems = [
     id: "dashboard",
   },
   {
-    title: "Người dùng",
+    title: "Users",
     icon: Users,
     id: "users",
   },
   {
-    title: "Doanh nghiệp",
+    title: "Businesses",
     icon: Building2,
     id: "businesses",
   },
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
           console.log(userData.users);
           setUsers(userData.users);
         } else {
-          toast.error("Dữ liệu người dùng không hợp lệ");
+          toast.error("Invalid user data");
         }
 
         const bizRes = await fetch("/api/admin/businesses");
@@ -133,10 +133,10 @@ export default function AdminDashboard() {
         if (Array.isArray(bizData.businesses)) {
           setBusinesses(bizData.businesses);
         } else {
-          toast.error("Dữ liệu doanh nghiệp không hợp lệ");
+          toast.error("Invalid business data");
         }
       } catch {
-        toast.error("Lỗi khi tải dữ liệu");
+        toast.error("Error loading data");
       } finally {
         setLoading(false);
       }
@@ -153,17 +153,17 @@ export default function AdminDashboard() {
         body: JSON.stringify({ apiKey: newApiKey }),
       });
       if (res.ok) {
-        toast.success("✅ Đã cập nhật API key");
+        toast.success("✅ API key updated");
         setEditingKey(null);
         const updated = await res.json();
         setBusinesses((prev) =>
           prev.map((b) => (b._id === businessId ? updated.business : b))
         );
       } else {
-        toast.error("❌ Cập nhật thất bại");
+        toast.error("❌ Update failed");
       }
     } catch {
-      toast.error("❌ Có lỗi xảy ra khi cập nhật");
+      toast.error("❌ Error updating");
     }
   };
 
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">🔄 Đang tải dữ liệu...</div>
+        <div className="text-lg">🔄 Loading data...</div>
       </div>
     );
   }
@@ -212,17 +212,13 @@ export default function AdminDashboard() {
         <h2 className="text-3xl font-bold tracking-tight text-main">
           Dashboard
         </h2>
-        <p className="text-muted-foreground text-main">
-          Tổng quan hệ thống quản trị
-        </p>
+        <p className="text-muted-foreground text-main">System overview</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tổng người dùng
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-main">
@@ -232,9 +228,7 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Người dùng hoạt động
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Active users</CardTitle>
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-main">
@@ -244,9 +238,7 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Đã xác thực eKYC
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">eKYC verified</CardTitle>
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-main">
@@ -257,7 +249,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Tổng doanh nghiệp
+              Total businesses
             </CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -268,7 +260,9 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">DN hoạt động</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active businesses
+            </CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-main">
@@ -284,10 +278,10 @@ export default function AdminDashboard() {
       <div className="md:flex items-center justify-between">
         <div>
           <h2 className="text-main text-3xl font-bold tracking-tight">
-            Quản lý người dùng
+            User management
           </h2>
           <p className="text-main text-muted-foreground">
-            Danh sách và quản lý tài khoản người dùng
+            List and manage user accounts
           </p>
         </div>
 
@@ -295,16 +289,16 @@ export default function AdminDashboard() {
           <DialogTrigger asChild>
             <Button type="button">
               <Plus className="mr-2 h-4 w-4" />
-              Thêm người dùng
+              Add user
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Thêm người dùng mới</DialogTitle>
+              <DialogTitle>Add new user</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Tên người dùng</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   value={newUser.username}
@@ -325,7 +319,7 @@ export default function AdminDashboard() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mật khẩu</Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -337,7 +331,7 @@ export default function AdminDashboard() {
               </div>
               {newUser.role === "user" && (
                 <div className="space-y-2">
-                  <Label htmlFor="businessId">Chọn Business</Label>
+                  <Label htmlFor="businessId">Select Business</Label>
                   <select
                     id="businessId"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -346,7 +340,7 @@ export default function AdminDashboard() {
                       setNewUser({ ...newUser, businessId: e.target.value })
                     }
                   >
-                    <option value="">-- Chọn business --</option>
+                    <option value="">-- Select business --</option>
                     {businesses.map((b) => (
                       <option key={b._id} value={b._id}>
                         {b.username}
@@ -357,7 +351,7 @@ export default function AdminDashboard() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="role">Vai trò</Label>
+                <Label htmlFor="role">Role</Label>
                 <select
                   id="role"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -381,12 +375,12 @@ export default function AdminDashboard() {
                     !newUser.password ||
                     !newUser.role
                   ) {
-                    toast.error("❌ Vui lòng nhập đầy đủ thông tin bắt buộc");
+                    toast.error("❌ Please fill in all required fields");
                     return;
                   }
 
                   if (newUser.role === "user" && !newUser.businessId) {
-                    toast.error("❌ Vui lòng chọn Business cho user");
+                    toast.error("❌ Please select a Business for user");
                     return;
                   }
                   try {
@@ -409,7 +403,7 @@ export default function AdminDashboard() {
                       } else {
                         setBusinesses((prev) => [...prev, created.user]);
                       }
-                      toast.success("✅ Đã tạo người dùng");
+                      toast.success("✅ User created");
                       setNewUser({
                         username: "",
                         email: "",
@@ -418,15 +412,15 @@ export default function AdminDashboard() {
                         businessId: "",
                       });
                     } else {
-                      toast.error("❌ Lỗi khi tạo người dùng");
+                      toast.error("❌ Error creating user");
                     }
                   } catch {
-                    toast.error("❌ Có lỗi xảy ra khi gửi yêu cầu");
+                    toast.error("❌ Error sending request");
                   }
                 }}
                 className="w-full"
               >
-                Tạo người dùng
+                Create user
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -437,7 +431,7 @@ export default function AdminDashboard() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Tìm kiếm người dùng..."
+            placeholder="Search users..."
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setSearchTerm(e.target.value)
@@ -450,14 +444,14 @@ export default function AdminDashboard() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="bg-main text-white">
               <Filter className="mr-2 h-4 w-4" />
-              Lọc:{" "}
+              Filter:{" "}
               {filterStatus === "all"
-                ? "Tất cả"
+                ? "All"
                 : filterStatus === "active"
-                  ? "Hoạt động"
+                  ? "Active"
                   : filterStatus === "banned"
-                    ? "Bị ban"
-                    : "Đã xác thực"}
+                    ? "Banned"
+                    : "Verified"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white">
@@ -465,25 +459,25 @@ export default function AdminDashboard() {
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("all")}
             >
-              Tất cả
+              All
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("active")}
             >
-              Hoạt động
+              Active
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("banned")}
             >
-              Bị ban
+              Banned
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("verified")}
             >
-              Đã xác thực
+              Verified
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -496,7 +490,7 @@ export default function AdminDashboard() {
               <thead className=" bg-muted/50">
                 <tr>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Người dùng
+                    User
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
                     Email
@@ -505,16 +499,16 @@ export default function AdminDashboard() {
                     eKYC
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Trạng thái
+                    Status
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Ngày tạo
+                    Created at
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Ngày cập nhật
+                    Updated at
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Thao tác
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -543,7 +537,7 @@ export default function AdminDashboard() {
                           justifyContent: "center",
                         }}
                       >
-                        {user.verified ? "Đã xác thực" : "Chưa xác thực"}
+                        {user.verified ? "Verified" : "Not verified"}
                       </Badge>
                     </td>
                     <td className="p-4">
@@ -561,7 +555,7 @@ export default function AdminDashboard() {
                           justifyContent: "center",
                         }}
                       >
-                        {user.isBanned ? "Bị ban" : "Hoạt động"}
+                        {user.isBanned ? "Banned" : "Active"}
                       </Badge>
                     </td>
                     <td className="p-4 text-sm">
@@ -590,14 +584,14 @@ export default function AdminDashboard() {
                             }}
                           >
                             <Edit className="mr-2 h-4 w-4" />
-                            Chỉnh sửa
+                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="hover:bg-gray-200"
                             onClick={() => setBanTarget(user)}
                           >
                             <Ban className="mr-2 h-4 w-4" />
-                            {user.isBanned ? "Bỏ ban" : "Ban"}
+                            {user.isBanned ? "Unban" : "Ban"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -614,11 +608,11 @@ export default function AdminDashboard() {
       <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Cập nhật người dùng</DialogTitle>
+            <DialogTitle>Update user</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-username">Tên người dùng</Label>
+              <Label htmlFor="edit-username">Username</Label>
               <Input
                 id="edit-username"
                 value={editValues.username}
@@ -639,7 +633,7 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="edit-password">
-                Mật khẩu mới (bỏ trống nếu không đổi)
+                New password (leave blank if unchanged)
               </Label>
               <Input
                 id="edit-password"
@@ -653,7 +647,7 @@ export default function AdminDashboard() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingUser(null)}>
-              Hủy
+              Cancel
             </Button>
             <Button
               onClick={async () => {
@@ -674,17 +668,17 @@ export default function AdminDashboard() {
                         u._id === editingUser._id ? updated.user : u
                       )
                     );
-                    toast.success("✅ Đã cập nhật người dùng");
+                    toast.success("✅ User updated");
                     setEditingUser(null);
                   } else {
-                    toast.error("❌ Cập nhật thất bại");
+                    toast.error("❌ Update failed");
                   }
                 } catch {
-                  toast.error("❌ Lỗi hệ thống");
+                  toast.error("❌ System error");
                 }
               }}
             >
-              Lưu thay đổi
+              Save changes
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -695,18 +689,18 @@ export default function AdminDashboard() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {banTarget?.isBanned ? "Bỏ ban tài khoản" : "Ban tài khoản"}
+              {banTarget?.isBanned ? "Unban account" : "Ban account"}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-muted-foreground">
-              Bạn có chắc chắn muốn {banTarget?.isBanned ? "bỏ ban" : "ban"} tài
-              khoản <strong>{banTarget?.username}</strong>?
+              Are you sure you want to {banTarget?.isBanned ? "unban" : "ban"}{" "}
+              account <strong>{banTarget?.username}</strong>?
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBanTarget(null)}>
-              Hủy
+              Cancel
             </Button>
             <Button
               variant={banTarget?.isBanned ? "default" : "destructive"}
@@ -728,20 +722,20 @@ export default function AdminDashboard() {
                     }
                     toast.success(
                       updated.user.isBanned
-                        ? "✅ Tài khoản đã bị ban"
-                        : "✅ Tài khoản đã được bỏ ban"
+                        ? "✅ Account has been banned"
+                        : "✅ Account has been unbanned"
                     );
                   } else {
-                    toast.error("Không thể cập nhật trạng thái ban");
+                    toast.error("Cannot update ban status");
                   }
                 } catch {
-                  toast.error("❌ Lỗi hệ thống");
+                  toast.error("❌ System error");
                 } finally {
                   setBanTarget(null);
                 }
               }}
             >
-              {banTarget?.isBanned ? "Bỏ ban" : "Ban"}
+              {banTarget?.isBanned ? "Unban" : "Ban"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -753,10 +747,10 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-main">
-          Quản lý doanh nghiệp
+          Business management
         </h2>
         <p className="text-muted-foreground text-main">
-          Danh sách và quản lý tài khoản doanh nghiệp
+          List and manage business accounts
         </p>
       </div>
 
@@ -764,7 +758,7 @@ export default function AdminDashboard() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Tìm kiếm doanh nghiệp..."
+            placeholder="Search businesses..."
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setSearchTerm(e.target.value)
@@ -777,12 +771,12 @@ export default function AdminDashboard() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="bg-main text-white">
               <Filter className="mr-2 h-4 w-4" />
-              Lọc:{" "}
+              Filter:{" "}
               {filterStatus === "all"
-                ? "Tất cả"
+                ? "All"
                 : filterStatus === "active"
-                  ? "Hoạt động"
-                  : "Bị ban"}
+                  ? "Active"
+                  : "Banned"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white">
@@ -790,19 +784,19 @@ export default function AdminDashboard() {
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("all")}
             >
-              Tất cả
+              All
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("active")}
             >
-              Hoạt động
+              Active
             </DropdownMenuItem>
             <DropdownMenuItem
               className="hover:bg-gray-200"
               onClick={() => setFilterStatus("banned")}
             >
-              Bị ban
+              Banned
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -815,25 +809,25 @@ export default function AdminDashboard() {
               <thead className=" bg-muted/50">
                 <tr>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Doanh nghiệp
+                    Business
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
                     Email
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Trạng thái
+                    Status
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
                     API Key
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Ngày tạo
+                    Created at
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Ngày cập nhật
+                    Updated at
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium">
-                    Thao tác
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -862,7 +856,7 @@ export default function AdminDashboard() {
                           justifyContent: "center",
                         }}
                       >
-                        {business.isBanned ? "Bị ban" : "Hoạt động"}
+                        {business.isBanned ? "Banned" : "Active"}
                       </Badge>
                     </td>
                     <td className="p-4">
@@ -879,14 +873,14 @@ export default function AdminDashboard() {
                             size="sm"
                             onClick={() => updateApiKey(business._id)}
                           >
-                            Lưu
+                            Save
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => setEditingKey(null)}
                           >
-                            Hủy
+                            Cancel
                           </Button>
                         </div>
                       ) : (
@@ -926,7 +920,7 @@ export default function AdminDashboard() {
                             onClick={() => setBanTarget(business)}
                           >
                             <Ban className="mr-2 h-4 w-4" />
-                            {business.isBanned ? "Bỏ ban" : "Ban"}
+                            {business.isBanned ? "Unban" : "Ban"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -943,18 +937,18 @@ export default function AdminDashboard() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {banTarget?.isBanned ? "Bỏ ban tài khoản" : "Ban tài khoản"}
+              {banTarget?.isBanned ? "Unban account" : "Ban account"}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-muted-foreground">
-              Bạn có chắc chắn muốn {banTarget?.isBanned ? "bỏ ban" : "ban"} tài
-              khoản <strong>{banTarget?.username}</strong>?
+              Are you sure you want to {banTarget?.isBanned ? "unban" : "ban"}{" "}
+              account <strong>{banTarget?.username}</strong>?
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBanTarget(null)}>
-              Hủy
+              Cancel
             </Button>
             <Button
               variant={banTarget?.isBanned ? "default" : "destructive"}
@@ -976,20 +970,20 @@ export default function AdminDashboard() {
                     );
                     toast.success(
                       updated.user.isBanned
-                        ? "✅ Tài khoản đã bị ban"
-                        : "✅ Tài khoản đã được bỏ ban"
+                        ? "✅ Account has been banned"
+                        : "✅ Account has been unbanned"
                     );
                   } else {
-                    toast.error("Không thể cập nhật trạng thái ban");
+                    toast.error("Cannot update ban status");
                   }
                 } catch {
-                  toast.error("❌ Lỗi hệ thống");
+                  toast.error("❌ System error");
                 } finally {
                   setBanTarget(null);
                 }
               }}
             >
-              {banTarget?.isBanned ? "Bỏ ban" : "Ban"}
+              {banTarget?.isBanned ? "Unban" : "Ban"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1037,7 +1031,7 @@ export default function AdminDashboard() {
         </div>
         <div className="p-2">
           <SidebarGroup>
-            <SidebarGroupLabel>Quản lý</SidebarGroupLabel>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {sidebarItems.map((item) => (

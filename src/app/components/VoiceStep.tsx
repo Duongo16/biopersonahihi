@@ -37,15 +37,15 @@ export default function VoiceStep({
         const file = new File([blob], "voice.wav", { type: "audio/wav" });
         setAudioFile(file);
         setAudioUrl(URL.createObjectURL(blob));
-        toast.success("✅ Đã ghi âm xong!");
+        toast.success("✅ Recording completed!");
       };
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsRecording(true);
-      toast("🎙️ Đang ghi âm...");
+      toast("🎙️ Recording...");
     } catch {
-      toast.error("Không thể truy cập microphone");
+      toast.error("Cannot access microphone");
     }
   };
 
@@ -55,13 +55,13 @@ export default function VoiceStep({
   };
 
   const handleUpload = async () => {
-    if (!audioFile || !userId) return toast.error("Thiếu dữ liệu");
+    if (!audioFile || !userId) return toast.error("Missing data");
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("user_id", userId); // ✅ đúng với backend FastAPI
+      formData.append("user_id", userId); // ✅ matches FastAPI backend
       formData.append("file", audioFile);
-      console.log("Gửi dữ liệu:", {
+      console.log("Sending data:", {
         user_id: userId,
         file: audioFile.name,
       });
@@ -79,13 +79,13 @@ export default function VoiceStep({
 
       const result = await res.json();
       if (res.ok) {
-        toast.success("🎉 Đã lưu voice vector thành công!");
+        toast.success("🎉 Voice vector saved successfully!");
         onSuccess();
       } else {
-        toast.error(result.message || "Lỗi khi enroll giọng nói");
+        toast.error(result.message || "Error enrolling voice");
       }
     } catch {
-      toast.error("Không thể gửi giọng nói lên server");
+      toast.error("Cannot upload voice to server");
     } finally {
       setLoading(false);
     }
@@ -94,9 +94,9 @@ export default function VoiceStep({
   if (hasVoice) {
     return (
       <div className="text-center bg-green-100 border border-green-500 text-green-700 p-4 rounded-lg">
-        <h2 className="text-xl font-semibold mb-2">Giọng nói đã đăng ký</h2>
+        <h2 className="text-xl font-semibold mb-2">Voice already registered</h2>
         <p>
-          Bạn đã đăng ký giọng nói thành công. Không thể thêm giọng nói mới.
+          You have successfully registered your voice. Cannot add a new voice.
         </p>
       </div>
     );
@@ -105,7 +105,7 @@ export default function VoiceStep({
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-center">
-        Bước 3: Thu âm giọng nói
+        Step 3: Record your voice
       </h2>
 
       <div className="flex justify-center gap-4">
@@ -114,28 +114,28 @@ export default function VoiceStep({
             onClick={startRecording}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
-            🎙️ Bắt đầu ghi
+            🎙️ Start recording
           </Button>
         ) : (
           <Button
             onClick={stopRecording}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            ⏹️ Dừng ghi
+            ⏹️ Stop recording
           </Button>
         )}
       </div>
 
       {audioUrl && (
         <div className="space-y-4">
-          <p className="text-center font-medium">🔊 Ghi âm đã xong:</p>
+          <p className="text-center font-medium">🔊 Recording completed:</p>
           <audio controls src={audioUrl} className="w-full" />
           <Button
             onClick={handleUpload}
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {loading ? "Đang gửi..." : "Gửi lên hệ thống"}
+            {loading ? "Uploading..." : "Upload to system"}
           </Button>
         </div>
       )}

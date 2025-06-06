@@ -61,7 +61,7 @@ export default function VerifyUserPage() {
         setCameraOn(true);
       }
     } catch {
-      toast.error("Không thể truy cập camera");
+      toast.error("Cannot access camera");
     }
   };
 
@@ -82,7 +82,7 @@ export default function VerifyUserPage() {
 
   const startRecording = () => {
     if (!cameraOn) {
-      toast.error("Vui lòng bật camera trước");
+      toast.error("Please turn on the camera first");
       return;
     }
 
@@ -106,7 +106,7 @@ export default function VerifyUserPage() {
       const blobUrl = URL.createObjectURL(blob);
       setVideoBlob(blobUrl);
 
-      toast.success("Quay video thành công!");
+      toast.success("Video recorded successfully!");
       stopCamera();
     };
 
@@ -142,7 +142,7 @@ export default function VerifyUserPage() {
         const blob = new Blob(chunks, { type: "audio/webm" });
         const file = new File([blob], "voice.webm", { type: "audio/webm" });
         setAudioFile(file);
-        toast.success("Ghi âm thành công!");
+        toast.success("Audio recorded successfully!");
         setCurrentStep(3);
       };
 
@@ -150,21 +150,21 @@ export default function VerifyUserPage() {
       recorder.start();
       setAudioRecording(true);
 
-      // Delay 5s rồi mới stop — đợi đảm bảo đủ thời lượng ghi
+      // Delay 5s to ensure enough recording duration
       setTimeout(() => {
         recorder.stop();
         setAudioRecording(false);
-        // 💡 Dừng tất cả track để giải phóng microphone
+        // 💡 Stop all tracks to release microphone
         stream.getTracks().forEach((track) => track.stop());
       }, 5000);
     } catch {
-      toast.error("Không thể truy cập microphone");
+      toast.error("Cannot access microphone");
     }
   };
 
   const handleFullVerification = async () => {
     if (!videoFile || !audioFile) {
-      toast.error("Vui lòng quay video và ghi âm trước khi xác thực.");
+      toast.error("Please record video and audio before verifying.");
       return;
     }
 
@@ -172,7 +172,7 @@ export default function VerifyUserPage() {
     setLoadingVoice(true);
 
     try {
-      // Gửi video để xác thực khuôn mặt
+      // Send video for face verification
       const faceForm = new FormData();
       faceForm.append("userId", userId as string);
       faceForm.append("video", videoFile);
@@ -192,16 +192,16 @@ export default function VerifyUserPage() {
       if (faceRes.ok) {
         setLivenessResult(faceData);
         if (faceData.is_live && faceData.is_match) {
-          toast.success("Xác thực khuôn mặt thành công!");
+          toast.success("Face verification successful!");
         } else {
-          if (!faceData.is_live) toast.error("Không phát hiện người thật!");
-          if (!faceData.is_match) toast.error("Khuôn mặt không khớp!");
+          if (!faceData.is_live) toast.error("No live person detected!");
+          if (!faceData.is_match) toast.error("Face does not match!");
         }
       } else {
-        toast.error(faceData.message || "Lỗi xác thực khuôn mặt");
+        toast.error(faceData.message || "Face verification error");
       }
 
-      // Gửi audio để xác thực giọng nói
+      // Send audio for voice verification
       const voiceForm = new FormData();
       voiceForm.append("user_id", userId as string);
       voiceForm.append("file", audioFile);
@@ -220,14 +220,14 @@ export default function VerifyUserPage() {
         setVoiceScore(voiceData.score);
         toast.success(
           voiceData.isMatch
-            ? `Giọng nói khớp (${voiceData.score.toFixed(2)})`
-            : `Giọng nói không khớp (${voiceData.score.toFixed(2)})`
+            ? `Voice matched (${voiceData.score.toFixed(2)})`
+            : `Voice not matched (${voiceData.score.toFixed(2)})`
         );
       } else {
-        toast.error(voiceData.message || "Lỗi xác thực giọng nói");
+        toast.error(voiceData.message || "Voice verification error");
       }
 
-      // Ghi log xác thực nếu cả hai kết quả đều có
+      // Log verification if both results are available
       if (faceData && voiceData) {
         await fetch(
           `${process.env.NEXT_PUBLIC_EKYC_API}/ekyc/verification-log`,
@@ -260,7 +260,7 @@ export default function VerifyUserPage() {
         );
       }
     } catch {
-      toast.error("Lỗi kết nối máy chủ");
+      toast.error("Server connection error");
     } finally {
       setLoadingLiveness(false);
       setLoadingVoice(false);
@@ -281,9 +281,9 @@ export default function VerifyUserPage() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-main mb-2">
-            XÁC THỰC NGƯỜI DÙNG
+            USER VERIFICATION
           </h1>
-          <p className="text-gray-600">Người dùng #{userId}</p>
+          <p className="text-gray-600">User #{userId}</p>
           <div className="mt-6">
             <Progress
               value={progressValue}
@@ -314,13 +314,13 @@ export default function VerifyUserPage() {
                     "1"
                   )}
                 </div>
-                Quay video khuôn mặt
+                Record face video
                 {videoFile && (
                   <Badge
                     variant="secondary"
                     className="ml-auto text-xs text-green-600"
                   >
-                    Hoàn thành
+                    Completed
                   </Badge>
                 )}
               </CardTitle>
@@ -370,7 +370,7 @@ export default function VerifyUserPage() {
                       className="flex items-center gap-1 text-xs h-8 px-2"
                     >
                       <RefreshCw className="w-3 h-3" />
-                      Quay lại
+                      Record again
                     </Button>
                   ) : !cameraOn ? (
                     <Button
@@ -378,7 +378,7 @@ export default function VerifyUserPage() {
                       className="flex items-center gap-1 text-xs h-8 px-2"
                     >
                       <Camera className="w-3 h-3" />
-                      Bật camera
+                      Turn on camera
                     </Button>
                   ) : (
                     <>
@@ -387,7 +387,7 @@ export default function VerifyUserPage() {
                         variant="outline"
                         className="text-xs h-8 px-2"
                       >
-                        Tắt camera
+                        Turn off camera
                       </Button>
                       <Button
                         onClick={startRecording}
@@ -399,7 +399,7 @@ export default function VerifyUserPage() {
                         ) : (
                           <Play className="w-3 h-3" />
                         )}
-                        {recording ? "Đang quay..." : "Bắt đầu"}
+                        {recording ? "Recording..." : "Start"}
                       </Button>
                     </>
                   )}
@@ -429,13 +429,13 @@ export default function VerifyUserPage() {
                     "2"
                   )}
                 </div>
-                Ghi âm giọng nói
+                Record voice
                 {audioFile && (
                   <Badge
                     variant="secondary"
                     className="ml-auto text-xs text-green-600"
                   >
-                    Hoàn thành
+                    Completed
                   </Badge>
                 )}
               </CardTitle>
@@ -450,14 +450,14 @@ export default function VerifyUserPage() {
 
                 <div>
                   <p className="text-gray-600 mb-3 text-xs">
-                    Nói một câu bất kỳ trong 5 giây
+                    Say any sentence for 5 seconds
                   </p>
                   <Button
                     onClick={startAudioRecording}
                     disabled={audioRecording || !videoFile}
                     className="bg-green-500 hover:bg-green-600 text-white text-xs h-8 px-3"
                   >
-                    {audioRecording ? "Đang ghi âm..." : "Bắt đầu ghi âm"}
+                    {audioRecording ? "Recording..." : "Start recording"}
                   </Button>
                 </div>
 
@@ -465,7 +465,7 @@ export default function VerifyUserPage() {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-2">
                     <CheckCircle className="w-5 h-5 text-green-500 mx-auto mb-1" />
                     <p className="text-green-700 text-xs font-medium">
-                      Đã ghi âm thành công!
+                      Audio recorded successfully!
                     </p>
                   </div>
                 )}
@@ -492,7 +492,7 @@ export default function VerifyUserPage() {
                     "3"
                   )}
                 </div>
-                Xác thực
+                Verification
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
@@ -514,8 +514,8 @@ export default function VerifyUserPage() {
                     className="w-full bg-main hover:bg-blue-700 text-white text-xs h-8"
                   >
                     {loadingLiveness || loadingVoice
-                      ? "Đang xác thực..."
-                      : "Xác thực danh tính"}
+                      ? "Verifying..."
+                      : "Verify identity"}
                   </Button>
                 </div>
 
@@ -524,7 +524,7 @@ export default function VerifyUserPage() {
                     {livenessResult && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
                         <h4 className="text-main font-semibold text-sm">
-                          Kết quả kiểm tra khuôn mặt
+                          Face verification result
                         </h4>
 
                         <div className="flex items-center gap-2">
@@ -534,8 +534,8 @@ export default function VerifyUserPage() {
                             <XCircle className="w-5 h-5 text-red-500" />
                           )}
                           <span className="font-medium">
-                            Phát hiện người thật:{" "}
-                            {livenessResult.is_live ? "Có" : "Không"}
+                            Live person detected:{" "}
+                            {livenessResult.is_live ? "Yes" : "No"}
                           </span>
                         </div>
 
@@ -546,13 +546,13 @@ export default function VerifyUserPage() {
                             <XCircle className="w-5 h-5 text-red-500" />
                           )}
                           <span className="font-medium">
-                            Khuôn mặt khớp:{" "}
-                            {livenessResult.is_match ? "Có" : "Không"}
+                            Face matched:{" "}
+                            {livenessResult.is_match ? "Yes" : "No"}
                           </span>
                         </div>
 
                         <p className="text-sm text-gray-600">
-                          Độ tương tự:{" "}
+                          Similarity:{" "}
                           {typeof livenessResult?.similarity === "number"
                             ? `${livenessResult.similarity.toFixed(2)}%`
                             : "N/A"}
@@ -563,7 +563,7 @@ export default function VerifyUserPage() {
                     {voiceScore !== null && (
                       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-1">
                         <h4 className="text-purple-700 font-semibold text-sm">
-                          Kết quả xác thực giọng nói
+                          Voice verification result
                         </h4>
 
                         <div className="flex items-center gap-2">
@@ -573,14 +573,14 @@ export default function VerifyUserPage() {
                             <XCircle className="w-5 h-5 text-red-500" />
                           )}
                           <span className="font-medium">
-                            Điểm số: {(voiceScore * 100).toFixed(1)}%
+                            Score: {(voiceScore * 100).toFixed(1)}%
                           </span>
                         </div>
 
                         <p className="text-sm text-gray-600">
                           {voiceScore > 0.7
-                            ? "Giọng nói khớp"
-                            : "Giọng nói không khớp"}
+                            ? "Voice matched"
+                            : "Voice not matched"}
                         </p>
                       </div>
                     )}
