@@ -45,9 +45,9 @@ import {
 import toast from "react-hot-toast";
 
 const sidebarItems = [
-  { title: "Thông tin cá nhân", icon: User, id: "profile" },
-  { title: "Bảo mật", icon: Shield, id: "security" },
-  { title: "Cài đặt", icon: Settings, id: "settings" },
+  { title: "Personal Information", icon: User, id: "profile" },
+  { title: "Security", icon: Shield, id: "security" },
+  { title: "Settings", icon: Settings, id: "settings" },
 ];
 
 type UserType = {
@@ -130,7 +130,7 @@ export default function ProfilePage() {
         }
         setIsEditing(false);
       } else {
-        toast.error(data.detail || "❌ Update error hihi");
+        toast.error(data.detail || "❌ Update error");
       }
     } catch {
       toast.error("Unable to connect to server");
@@ -238,7 +238,7 @@ export default function ProfilePage() {
                       : "bg-yellow-400 text-black"
                   }
                 >
-                  {user.verified ? "Đã đăng ký" : "Chưa đăng ký"}
+                  {user.verified ? "Registered" : "Not registered"}
                 </Badge>
                 <Badge variant="outline">{user.role || "User"}</Badge>
               </div>
@@ -297,7 +297,7 @@ export default function ProfilePage() {
                 className="flex items-center gap-2"
               >
                 <Save className="h-4 w-4" />
-                {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+                {isUpdating ? "Saving..." : "Save changes"}
               </Button>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Cancel
@@ -310,7 +310,7 @@ export default function ProfilePage() {
               className="flex items-center gap-2 bg-main text-white"
             >
               <Edit className="h-4 w-4" />
-              {"Chỉnh sửa"}
+              {"Edit"}
             </Button>
           )}
         </CardContent>
@@ -332,7 +332,7 @@ export default function ProfilePage() {
               <div>
                 <p className="font-medium">eKYC Status</p>
                 <p className="text-sm text-muted-foreground">
-                  {user.verified ? "Đã đăng ký eKYC" : "Chưa đăng ký eKYC"}
+                  {user.verified ? "eKYC registered" : "eKYC not registered"}
                 </p>
               </div>
             </div>
@@ -387,7 +387,7 @@ export default function ProfilePage() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFormData({ ...formData, currentPassword: e.target.value })
               }
-              placeholder="Nhập mật khẩu hiện tại"
+              placeholder="Enter current password"
             />
           </div>
           <div className="space-y-2">
@@ -430,7 +430,9 @@ export default function ProfilePage() {
   const renderSettings = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-main">Setting</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-main">
+          Settings
+        </h2>
         <p className="text-muted-foreground">Customize your user experience</p>
       </div>
       <Card>
@@ -498,7 +500,7 @@ export default function ProfilePage() {
         } md:translate-x-0`}
       >
         <div className="flex items-center justify-between px-4 py-2 ">
-          <h1 className=" text-lg font-semibold">Tài khoản</h1>
+          <h1 className=" text-lg font-semibold">Account</h1>
           <button
             className="md:hidden p-1 rounded hover:bg-gray-100"
             onClick={closeSidebar}

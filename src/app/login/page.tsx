@@ -60,7 +60,7 @@ export default function LoginPage() {
         toast.dismiss("login");
         toast.success(data.message || "Login successful! 🎉");
 
-        // Lấy thông tin người dùng
+        // Get user information
         const userResponse = await fetch(
           `${process.env.NEXT_PUBLIC_AUTH_API}/auth/me`,
           {
