@@ -9,9 +9,7 @@ import { usePathname } from "next/navigation";
 import useAuthStore from "@/store/authStore";
 import toast, { Toaster } from "react-hot-toast";
 import useFetchUserOnce from "@/hooks/useFetchUserOnce";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { SpeedInsights } from "@vercel/speed-insights/next";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -288,6 +286,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <main className="container mx-auto mt-6">{children}</main>
         <Toaster position="top-center" reverseOrder={false} />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
