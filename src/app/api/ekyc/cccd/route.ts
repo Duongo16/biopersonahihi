@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
 
@@ -19,12 +19,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Giải mã token để lấy user ID
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
-    const userId = decoded.id;
+    // ✅ Giải mã token bằng jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload: decoded } = await jwtVerify(token, secret);
+    const userId = decoded.id as string;
 
     const formData = await req.formData();
     const idFront = formData.get("idFront") as File;

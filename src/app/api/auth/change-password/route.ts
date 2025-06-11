@@ -2,26 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
 export async function PATCH(req: NextRequest) {
   try {
-    // Lấy token từ cookie
     const token = req.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Giải mã token để lấy user ID
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
-    const userId = decoded.id;
+    // Giải mã token với jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload } = await jwtVerify(token, secret);
+    const userId = payload.id as string;
 
     await connectDB();
-    const body = await req.json();
-    const { currentPassword, newPassword } = body;
+    const { currentPassword, newPassword } = await req.json();
 
     if (!userId || !currentPassword || !newPassword) {
       return NextResponse.json(

@@ -1,7 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-// import fs from "fs";
-// import path from "path";
-import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
 import FormData from "form-data";
@@ -9,6 +6,7 @@ import axios from "axios";
 import { getBusinessUsers } from "@/app/lib/business";
 import cloudinary from "@/utils/cloudinary";
 import { fileToDataUri } from "@/utils/clound-file";
+import { jwtVerify } from "jose";
 
 export const config = {
   api: {
@@ -24,12 +22,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Giải mã token để lấy user ID
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
-    const userId = decoded.id;
+    // ✅ Giải mã token bằng jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload: decoded } = await jwtVerify(token, secret);
+    const userId = decoded.id as string;
     console.log(decoded);
 
     // Tải lên file ảnh CCCD
@@ -86,14 +82,16 @@ export async function POST(req: NextRequest) {
       interface BusinessUser {
         id: string;
       }
-      const users: BusinessUser[] = await getBusinessUsers(decoded.businessId);
-      // Kiểm tra xem số CCCD đã tồn tại hay chưa
-      const userIds = users.map((user: BusinessUser) => user.id);
+      const users: BusinessUser[] = await getBusinessUsers(
+        decoded.businessId as string
+      );
+      const userIds = users.map((user) => user.id);
+
       const duplicateCCCD = await UserCCCD.findOne({
         idNumber: extractedID,
         userId: { $in: userIds },
       });
-      console.log(extractedID, decoded.businessId, duplicateCCCD);
+
       if (duplicateCCCD) {
         return NextResponse.json(
           {
@@ -104,21 +102,6 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      //Upload ảnh vào public local
-      // const uploadDir = path.join(process.cwd(), "public", "uploads");
-      // if (!fs.existsSync(uploadDir))
-      //   fs.mkdirSync(uploadDir, { recursive: true });
-
-      // const frontFileName = `/uploads/${userId}-id-front-${Date.now()}.${idFront.type.split("/")[1]}`;
-      // const backFileName = `/uploads/${userId}-id-back-${Date.now()}.${idBack.type.split("/")[1]}`;
-
-      // const frontPath = path.join(uploadDir, frontFileName);
-      // const backPath = path.join(uploadDir, backFileName);
-
-      // fs.writeFileSync(frontPath, frontBuffer);
-      // fs.writeFileSync(backPath, Buffer.from(await idBack.arrayBuffer()));
-
-      //Upload lên clound
       const frontDataUri = await fileToDataUri(idFront);
       const frontResult = await cloudinary.uploader.upload(frontDataUri, {
         folder: "biopersona/id-fronts",

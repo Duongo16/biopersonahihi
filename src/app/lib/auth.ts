@@ -1,31 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify, type JWTPayload } from "jose";
 
-export function verifyTokenWithRole(req: NextRequest, allowedRoles: string[]) {
-  const authHeader = req.headers.get("authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return {
-      error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
-    };
-  }
-
-  const token = authHeader.split(" ")[1];
-  console.log("token hihi: " + token);
-
-  if (!token) {
-    return {
-      error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
-    };
-  }
-
+export async function verifyTokenWithRole(
+  req: NextRequest,
+  allowedRoles: string[]
+): Promise<{ user?: JWTPayload; error?: NextResponse }> {
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
+    const token =
+      req.cookies.get("token")?.value ||
+      req.headers.get("authorization")?.replace("Bearer ", "");
 
-    if (!decoded || !allowedRoles.includes(decoded.role)) {
+    if (!token) {
+      return {
+        error: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
+      };
+    }
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload } = await jwtVerify(token, secret);
+
+    const role = payload.role as string;
+    if (!allowedRoles.includes(role)) {
       return {
         error: NextResponse.json(
           { message: "Không có quyền truy cập" },
@@ -34,11 +29,11 @@ export function verifyTokenWithRole(req: NextRequest, allowedRoles: string[]) {
       };
     }
 
-    return { user: decoded };
+    return { user: payload };
   } catch {
     return {
       error: NextResponse.json(
-        { message: "Token không hợp lệ" },
+        { message: "Token không hợp lệ hoặc đã hết hạn" },
         { status: 401 }
       ),
     };

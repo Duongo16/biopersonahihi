@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { SignJWT } from "jose";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 
@@ -28,24 +28,23 @@ export async function POST(req: NextRequest) {
     if (user.isBanned) {
       return NextResponse.json(
         { message: "Tài khoản đã bị ban, không thể đăng nhập" },
-        { status: 404 }
+        { status: 403 }
       );
     }
 
-    // Tạo token JWT
-    const token = jwt.sign(
-      {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        businessId: user.businessId,
-      },
-      process.env.JWT_SECRET || "",
-      { expiresIn: "1h" }
-    );
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const token = await new SignJWT({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      businessId: user.businessId,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime(rememberMe ? "7d" : "1h")
+      .setIssuedAt()
+      .sign(secret);
 
-    // Set token vào cookie
     const response = NextResponse.json(
       { message: "Đăng nhập thành công" },
       { status: 200 }
@@ -53,7 +52,7 @@ export async function POST(req: NextRequest) {
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60,
+      maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60, // 7 ngày hoặc 1h
       path: "/",
     });
 

@@ -1,13 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
 // import fs from "fs";
 // import path from "path";
-import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
 import FormData from "form-data";
 import axios from "axios";
 import cloudinary from "@/utils/cloudinary";
 import { fileToDataUri } from "@/utils/clound-file";
+import { jwtVerify } from "jose";
 
 export const config = {
   api: {
@@ -22,11 +22,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
-    const userId = decoded.id;
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload } = await jwtVerify(token, secret);
+
+    const userId = payload.id;
 
     await connectDB();
 

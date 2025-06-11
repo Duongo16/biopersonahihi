@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
 import { nanoid } from "nanoid";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -12,10 +12,8 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload: decoded } = await jwtVerify(token, secret);
 
     if (!decoded || (decoded.role !== "business" && decoded.role !== "admin")) {
       return NextResponse.json(
@@ -26,12 +24,10 @@ export async function PATCH(req: NextRequest) {
 
     await connectDB();
 
-    // Tạo API key mới
     const newApiKey = nanoid(32);
 
-    // Cập nhật API key cho business
     const updatedBusiness = await User.findByIdAndUpdate(
-      decoded.id,
+      decoded.id as string,
       { apiKey: newApiKey },
       { new: true }
     );

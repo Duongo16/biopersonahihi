@@ -217,6 +217,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           ekycDone !== null &&
           pathname !== "/profile" &&
           pathname !== "/ekyc" &&
+          pathname !== "/unauthorized" &&
           pathname !== "/dashboard" && (
             <div className="pt-15 flex justify-center z-40 absolute w-full">
               <div

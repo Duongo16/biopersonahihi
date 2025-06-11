@@ -1,24 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/utils/db";
 import UserCCCD from "@/utils/models/UserCCCD";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
 export async function GET(req: NextRequest) {
   try {
-    // Lấy token từ cookie
     const token = req.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Giải mã token để lấy user ID
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
-    const userId = decoded.id;
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload: decoded } = await jwtVerify(token, secret);
+    const userId = decoded.id as string;
 
-    // Kết nối tới database và lấy thông tin CCCD
     await connectDB();
     const userCCCD = await UserCCCD.findOne({ userId });
     if (!userCCCD) {

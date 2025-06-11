@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 import connectDB from "@/utils/db";
 import VerificationLog from "@/utils/models/VerificationLog";
 import { getBusinessUsers } from "@/app/lib/business";
@@ -13,15 +13,13 @@ export async function GET(req: NextRequest) {
     }
 
     const token = authHeader.split(" ")[1];
-
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
+    // ✅ Giải mã token bằng jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload: decoded } = await jwtVerify(token, secret);
 
     interface BusinessUser {
       _id: string;
@@ -29,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    const users = await getBusinessUsers(decoded.id);
+    const users = await getBusinessUsers(decoded.id as string);
     const userIds = users.map((user: BusinessUser) => user._id);
 
     const logs = await VerificationLog.find({ userId: { $in: userIds } })

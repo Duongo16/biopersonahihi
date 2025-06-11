@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/utils/db";
 import User from "@/utils/models/User";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,10 +17,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as jwt.JwtPayload;
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "");
+    const { payload: decoded } = await jwtVerify(token, secret);
 
     if (!decoded || decoded.role !== "business") {
       return NextResponse.json(
