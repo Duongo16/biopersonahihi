@@ -22,7 +22,9 @@ export async function middleware(req: NextRequest) {
     req.headers.get("authorization")?.split(" ")[1] ||
     req.cookies.get("token")?.value;
 
-  console.log(`🔍 Middleware path: ${pathname}, token exists: ${!!token}`);
+  console.log(
+    `🔍 Middleware path: ${pathname}, token exists: ${!!token}, req:${req.headers}`
+  );
 
   // Nếu chưa đăng nhập mà truy cập trang bảo vệ => redirect
   if (!token && isProtectedPath) {
