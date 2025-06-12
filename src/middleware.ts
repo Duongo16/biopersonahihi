@@ -19,8 +19,7 @@ export async function middleware(req: NextRequest) {
   );
 
   const token =
-    req.headers.get("authorization")?.split(" ")[1] ||
-    req.cookies.get("token")?.value;
+    req.cookies.get("token")?.value || req.headers.get("x-vercel-oidc-token");
 
   console.log(
     `🔍 Middleware path: ${pathname}, token exists: ${!!token}, req:${req.headers.get("Authorization")}`
