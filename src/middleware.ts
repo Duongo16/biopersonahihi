@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify, createRemoteJWKSet } from "jose";
-
-const OIDC_ISSUER = "https://oidc.vercel.app/biopersonahihi";
-const JWKS = createRemoteJWKSet(
-  new URL(`${OIDC_ISSUER}/.well-known/jwks.json`)
-);
+import { jwtVerify } from "jose";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-
   const publicPaths = ["/login", "/register"];
   const protectedPaths = [
     "/dashboard",
@@ -24,53 +18,32 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith(path)
   );
 
-  // 🧠 Lấy token từ các nguồn: cookie, x-vercel-oidc-token, Authorization: Bearer
-  const cookieToken = req.cookies.get("token")?.value;
-  const headerToken = req.headers.get("x-vercel-oidc-token");
-
-  const authHeader = req.headers.get("authorization");
-  const bearerToken = authHeader?.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : null;
-
-  const token = cookieToken || headerToken || bearerToken;
+  const token =
+    req.headers.get("authorization")?.split(" ")[1] ||
+    req.cookies.get("token")?.value;
 
   console.log(`🔍 Middleware path: ${pathname}, token exists: ${!!token}`);
 
-  // 🔐 Nếu là path cần bảo vệ nhưng không có token → về login
+  // Nếu chưa đăng nhập mà truy cập trang bảo vệ => redirect
   if (!token && isProtectedPath) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 🔐 Nếu đã có token mà lại vào trang public (login, register) → về trang chủ
+  // Nếu đã đăng nhập mà vào trang công khai => redirect
   if (token && isPublicPath) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
+  // Nếu có token => kiểm tra role
   if (token) {
     try {
-      let payload;
+      const { payload } = await jwtVerify(
+        token,
+        new TextEncoder().encode(process.env.JWT_SECRET || "")
+      );
 
-      if (cookieToken) {
-        // ✅ Token tự cấp - HS256 (HMAC)
-        const { payload: verifiedPayload } = await jwtVerify(
-          cookieToken,
-          new TextEncoder().encode(process.env.JWT_SECRET || "")
-        );
-        payload = verifiedPayload;
-      } else {
-        // ✅ Token OIDC (từ x-vercel-oidc-token hoặc Authorization) - RS256
-        const { payload: verifiedPayload } = await jwtVerify(
-          headerToken || bearerToken!,
-          JWKS,
-          { algorithms: ["RS256"] }
-        );
-        payload = verifiedPayload;
-      }
+      const role = payload.role as string;
 
-      const role = payload?.role as string;
-
-      // ⚠️ Phân quyền chi tiết theo role
       if (pathname.startsWith("/dashboard-business") && role !== "business") {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
@@ -79,6 +52,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
 
+      // Token hợp lệ => cho phép truy cập
       return NextResponse.next();
     } catch (err) {
       console.error("❌ Token invalid:", err);
@@ -86,6 +60,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Nếu là public path hoặc không cần auth
   return NextResponse.next();
 }
 
