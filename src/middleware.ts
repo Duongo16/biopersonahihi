@@ -9,6 +9,7 @@ const JWKS = createRemoteJWKSet(
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
   const publicPaths = ["/login", "/register"];
   const protectedPaths = [
     "/dashboard",
@@ -23,16 +24,25 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith(path)
   );
 
+  // 🧠 Lấy token từ các nguồn: cookie, x-vercel-oidc-token, Authorization: Bearer
   const cookieToken = req.cookies.get("token")?.value;
   const headerToken = req.headers.get("x-vercel-oidc-token");
-  const token = cookieToken || headerToken;
+
+  const authHeader = req.headers.get("authorization");
+  const bearerToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : null;
+
+  const token = cookieToken || headerToken || bearerToken;
 
   console.log(`🔍 Middleware path: ${pathname}, token exists: ${!!token}`);
 
+  // 🔐 Nếu là path cần bảo vệ nhưng không có token → về login
   if (!token && isProtectedPath) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  // 🔐 Nếu đã có token mà lại vào trang public (login, register) → về trang chủ
   if (token && isPublicPath) {
     return NextResponse.redirect(new URL("/", req.url));
   }
@@ -42,16 +52,16 @@ export async function middleware(req: NextRequest) {
       let payload;
 
       if (cookieToken) {
-        // HMAC token (e.g. HS256 with shared secret)
+        // ✅ Token tự cấp - HS256 (HMAC)
         const { payload: verifiedPayload } = await jwtVerify(
           cookieToken,
           new TextEncoder().encode(process.env.JWT_SECRET || "")
         );
         payload = verifiedPayload;
-      } else if (headerToken) {
-        // RS256 with Vercel OIDC
+      } else {
+        // ✅ Token OIDC (từ x-vercel-oidc-token hoặc Authorization) - RS256
         const { payload: verifiedPayload } = await jwtVerify(
-          headerToken,
+          headerToken || bearerToken!,
           JWKS,
           { algorithms: ["RS256"] }
         );
@@ -60,6 +70,7 @@ export async function middleware(req: NextRequest) {
 
       const role = payload?.role as string;
 
+      // ⚠️ Phân quyền chi tiết theo role
       if (pathname.startsWith("/dashboard-business") && role !== "business") {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
